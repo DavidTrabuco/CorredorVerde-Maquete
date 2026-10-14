@@ -1,0 +1,463 @@
+{
+ "malha": {
+  "colunas": 5,
+  "linhas": 4,
+  "hospitais": [
+   {
+    "id": "H1",
+    "nome": "Hospital Norte",
+    "no": "C3"
+   },
+   {
+    "id": "H2",
+    "nome": "Hospital Sul",
+    "no": "C18"
+   }
+  ],
+  "bases": [
+   {
+    "nome": "Base do SAMU",
+    "no": "C11",
+    "tipo": "AMBULANCIA"
+   },
+   {
+    "nome": "Quartel dos Bombeiros",
+    "no": "C20",
+    "tipo": "BOMBEIROS"
+   }
+  ],
+  "viaturas": [
+   {
+    "id": "AMB-01",
+    "tipo": "AMBULANCIA",
+    "base": "C11",
+    "papel": "PATRULHA"
+   },
+   {
+    "id": "AMB-02",
+    "tipo": "AMBULANCIA",
+    "base": "C11",
+    "papel": "RESERVA"
+   },
+   {
+    "id": "BOM-01",
+    "tipo": "BOMBEIROS",
+    "base": "C20",
+    "papel": "PATRULHA"
+   },
+   {
+    "id": "BOM-02",
+    "tipo": "BOMBEIROS",
+    "base": "C20",
+    "papel": "RESERVA"
+   }
+  ]
+ },
+ "config": {
+  "verdeSeg": 8,
+  "amareloSeg": 2,
+  "atendimentoSeg": 4,
+  "cautelaSeg": 1
+ },
+ "atores": [
+  {
+   "nome": "Usuário da maquete",
+   "tipo": "Humano",
+   "papel": "Registra emergências, pode assumir a direção da AMB-01, simula falhas e consulta o log"
+  },
+  {
+   "nome": "Temporizador",
+   "tipo": "Tempo",
+   "papel": "Avança o relógio da simulação: ciclo dos semáforos e tempo de atendimento"
+  }
+ ],
+ "rn": [
+  {
+   "id": "RN01",
+   "texto": "Em um cruzamento, as direções Norte-Sul e Leste-Oeste nunca ficam em verde ao mesmo tempo."
+  },
+  {
+   "id": "RN02",
+   "texto": "Toda troca de verde para vermelho passa por amarelo de 2 s."
+  },
+  {
+   "id": "RN03",
+   "texto": "Fora de um corredor, cada semáforo alterna as direções em ciclo fixo: 8 s de verde e 2 s de amarelo para cada uma."
+  },
+  {
+   "id": "RN04",
+   "texto": "Ao registrar uma emergência da ambulância, a rota tem dois trechos: da posição atual até o local da ocorrência e, de lá, até o hospital mais próximo."
+  },
+  {
+   "id": "RN05",
+   "texto": "Cada trecho segue o menor caminho pelas ruas, contado em quarteirões, sem passar por semáforos em falha."
+  },
+  {
+   "id": "RN06",
+   "texto": "Ao iniciar um trecho, todos os cruzamentos dele abrem corredor verde: ficam verdes na direção em que a viatura vai chegar. O trecho até o hospital abre quando o atendimento termina."
+  },
+  {
+   "id": "RN07",
+   "texto": "Nenhuma viatura ou carro comum atravessa um cruzamento com vermelho ou amarelo; quem chega espera o verde."
+  },
+  {
+   "id": "RN08",
+   "texto": "Depois que a viatura passa por um cruzamento do corredor, ele volta ao ciclo normal."
+  },
+  {
+   "id": "RN09",
+   "texto": "No local da ocorrência, a viatura fica 4 s em atendimento. A ambulância então segue ao hospital; ao chegar, a ocorrência é encerrada."
+  },
+  {
+   "id": "RN10",
+   "texto": "Se a viatura sair da rota, a rota é recalculada a partir da posição atual, e os cruzamentos que saíram do trajeto voltam ao ciclo normal."
+  },
+  {
+   "id": "RN11",
+   "texto": "A viatura dos bombeiros segue apenas até o local da ocorrência; só a ambulância segue ao hospital."
+  },
+  {
+   "id": "RN12",
+   "texto": "Quando dois corredores pedem direções diferentes no mesmo cruzamento, passa primeiro a ocorrência de maior criticidade (1 risco de vida, 2 urgente, 3 padrão); em empate, a registrada primeiro."
+  },
+  {
+   "id": "RN13",
+   "texto": "Um semáforo em falha fica em amarelo piscante: os veículos param e seguem com cautela, e as rotas de emergência desviam dele. Sem caminho possível, a viatura é avisada e aguarda."
+  },
+  {
+   "id": "RN14",
+   "texto": "Toda ocorrência, abertura e liberação de corredor, desvio, conflito e falha é registrada no log de eventos."
+  },
+  {
+   "id": "RN15",
+   "texto": "A emergência vai para a viatura livre do tipo pedido mais perto do local (menor caminho em quarteirões): a da patrulha, se ela estiver mais perto, ou a de reserva, se o local for mais perto da base; em empate, vai a da patrulha. Sem viatura livre, o pedido é recusado. Ao terminar o serviço, a viatura da patrulha volta a patrulhar de onde está, e a de reserva volta para a base sem corredor verde."
+  }
+ ],
+ "uc": [
+  {
+   "id": "UC01",
+   "nome": "Dirigir ou patrulhar",
+   "ator": "Usuário da maquete",
+   "resumo": "As viaturas livres circulam sozinhas; o usuário pode assumir a AMB-01",
+   "principal": [
+    "Sem ninguém dirigindo, a viatura livre escolhe uma rua ao acaso em cada cruzamento.",
+    "A viatura segue até o próximo cruzamento, respeitando o semáforo (RN07), e informa a chegada à API.",
+    "O usuário pode assumir a AMB-01 com as setas ou os botões da tela e dirigir para onde quiser."
+   ],
+   "secundarios": [
+    "Semáforo fechado na direção da viatura: ela para na faixa e espera o verde (RN07).",
+    "O usuário desmarca \"Eu dirijo a AMB-01\": ela volta a patrulhar sozinha."
+   ]
+  },
+  {
+   "id": "UC02",
+   "nome": "Operar o ciclo dos semáforos",
+   "ator": "Temporizador",
+   "resumo": "Alterna as direções de cada cruzamento no tempo certo",
+   "principal": [
+    "O temporizador avança o relógio da simulação.",
+    "O sistema troca a fase dos cruzamentos que completaram o tempo de verde ou de amarelo (RN02, RN03).",
+    "A maquete consulta a API e mostra as novas cores."
+   ],
+   "secundarios": [
+    "Cruzamento em corredor: a fase fica parada no verde da viatura (RN06).",
+    "Cruzamento em falha: fica em amarelo piscante (RN13)."
+   ]
+  },
+  {
+   "id": "UC03",
+   "nome": "Registrar emergência",
+   "ator": "Usuário da maquete",
+   "resumo": "Escolhe a criticidade e clica no local da ocorrência no mapa",
+   "principal": [
+    "O usuário escolhe a criticidade e clica em \"Emergência da ambulância\" ou \"Emergência dos bombeiros\".",
+    "O usuário clica no cruzamento da ocorrência.",
+    "O sistema valida os dados, escolhe a viatura livre mais perto do local (RN15) e registra a ocorrência."
+   ],
+   "secundarios": [
+    "A viatura de reserva está mais perto que a da patrulha: a reserva sai da base e atende (RN15).",
+    "Nenhuma viatura livre do tipo pedido: o pedido é recusado com aviso.",
+    "Cruzamento inexistente, criticidade fora de 1 a 3 ou tipo de viatura inválido: o pedido é recusado (RNF04)."
+   ]
+  },
+  {
+   "id": "UC04",
+   "nome": "Abrir corredor verde",
+   "ator": "Usuário da maquete",
+   "resumo": "Calcula a rota e abre todos os cruzamentos do trecho",
+   "principal": [
+    "O sistema calcula os dois trechos da rota (RN04, RN05).",
+    "O sistema abre o corredor em todos os cruzamentos do primeiro trecho (RN06).",
+    "A maquete mostra a rota e os cruzamentos abertos."
+   ],
+   "secundarios": [
+    "Outro corredor pede direção diferente em um cruzamento: segue para o UC08.",
+    "Sem caminho possível: a viatura é avisada e aguarda (RN13)."
+   ]
+  },
+  {
+   "id": "UC05",
+   "nome": "Atender a ocorrência e encerrar",
+   "ator": "Temporizador",
+   "resumo": "Atendimento no local, trecho até o hospital e fim do serviço",
+   "principal": [
+    "A viatura chega ao local da ocorrência.",
+    "O sistema conta 4 s de atendimento (RN09).",
+    "O sistema abre o corredor do trecho até o hospital.",
+    "Ao chegar ao hospital, o sistema encerra a ocorrência."
+   ],
+   "secundarios": [
+    "Viatura dos bombeiros: a ocorrência é encerrada no próprio local (RN11).",
+    "Viatura da patrulha: ao terminar, volta a patrulhar de onde está (RN15).",
+    "Viatura de reserva: ao terminar, volta para a base sem corredor e fica estacionada (RN15)."
+   ]
+  },
+  {
+   "id": "UC06",
+   "nome": "Liberar cruzamento",
+   "ator": "Usuário da maquete",
+   "resumo": "O cruzamento volta ao ciclo normal depois da passagem",
+   "principal": [
+    "A viatura informa que chegou a um cruzamento do corredor.",
+    "O sistema retira a reserva do corredor naquele cruzamento (RN08).",
+    "O cruzamento volta ao ciclo normal."
+   ],
+   "secundarios": [
+    "Cruzamento ainda reservado por outra viatura: segue o corredor dela."
+   ]
+  },
+  {
+   "id": "UC07",
+   "nome": "Recalcular rota",
+   "ator": "Usuário da maquete",
+   "resumo": "A viatura saiu da rota e o trajeto é refeito",
+   "principal": [
+    "A viatura sai de um cruzamento por uma rua fora da rota.",
+    "O sistema recalcula o trecho a partir do próximo cruzamento (RN10).",
+    "O sistema abre o novo corredor e libera os cruzamentos que saíram do trajeto."
+   ],
+   "secundarios": [
+    "Ninguém está dirigindo a AMB-01: a viatura segue a rota sozinha e não sai dela."
+   ]
+  },
+  {
+   "id": "UC08",
+   "nome": "Resolver conflito entre emergências",
+   "ator": "Usuário da maquete",
+   "resumo": "Dois corredores pedem direções diferentes no mesmo cruzamento",
+   "principal": [
+    "Um segundo corredor reserva um cruzamento já reservado em outra direção.",
+    "O sistema compara a criticidade das ocorrências (RN12).",
+    "O cruzamento abre para a de maior prioridade; a outra viatura espera no vermelho."
+   ],
+   "secundarios": [
+    "Criticidades iguais: passa a ocorrência registrada primeiro.",
+    "Corredores na mesma direção: não há conflito, o cruzamento fica verde para os dois."
+   ]
+  },
+  {
+   "id": "UC09",
+   "nome": "Simular falha de semáforo",
+   "ator": "Usuário da maquete",
+   "resumo": "Liga ou desliga a falha de um cruzamento com um clique",
+   "principal": [
+    "O usuário clica em \"Simular falha\" e depois em um cruzamento.",
+    "O sistema coloca o semáforo em amarelo piscante (RN13).",
+    "O sistema recalcula as rotas de emergência que passavam por ele."
+   ],
+   "secundarios": [
+    "Clique em um cruzamento já em falha: a falha é desligada e o ciclo normal recomeça."
+   ]
+  },
+  {
+   "id": "UC10",
+   "nome": "Consultar log de eventos",
+   "ator": "Usuário da maquete",
+   "resumo": "Painel com os eventos e a regra que cada um cumpre",
+   "principal": [
+    "O usuário abre a aba Log.",
+    "O sistema lista os eventos do mais recente ao mais antigo, com a regra de cada um.",
+    "O usuário filtra por um requisito."
+   ],
+   "secundarios": [
+    "Nenhum evento no filtro: o painel informa que não há registros."
+   ]
+  }
+ ],
+ "criticos": [
+  "UC02",
+  "UC04",
+  "UC06",
+  "UC07",
+  "UC08",
+  "UC09"
+ ],
+ "rnf": [
+  {
+   "id": "RNF01",
+   "atributo": "Confiabilidade",
+   "prioridade": "Crítica",
+   "texto": "Nenhum cenário de teste resulta em verde nas duas direções de um cruzamento ao mesmo tempo",
+   "verificacao": "Teste xUnit sobre a RN01 e simulação do RNF02",
+   "auto": true
+  },
+  {
+   "id": "RNF02",
+   "atributo": "Confiabilidade",
+   "prioridade": "Crítica",
+   "texto": "Uma simulação de 1 hora (tempo simulado) com emergências e falhas aleatórias roda sem exceção e sem violar a RN01 e a RN02",
+   "verificacao": "Teste xUnit com relógio simulado",
+   "auto": true
+  },
+  {
+   "id": "RNF03",
+   "atributo": "Confiabilidade",
+   "prioridade": "Alta",
+   "texto": "Sem caminho possível, o sistema avisa a viatura e continua funcionando",
+   "verificacao": "Teste xUnit com cruzamentos bloqueados",
+   "auto": true
+  },
+  {
+   "id": "RNF04",
+   "atributo": "Segurança",
+   "prioridade": "Alta",
+   "texto": "A API recusa dados inválidos (cruzamento inexistente, criticidade fora de 1 a 3, tipo de viatura inválido) e pedidos sem viatura livre, sem alterar o estado",
+   "verificacao": "Testes de integração",
+   "auto": true
+  },
+  {
+   "id": "RNF05",
+   "atributo": "Segurança",
+   "prioridade": "Média",
+   "texto": "O log de eventos não pode ser editado nem apagado pela API",
+   "verificacao": "Teste de integração",
+   "auto": true
+  },
+  {
+   "id": "RNF06",
+   "atributo": "Eficiência",
+   "prioridade": "Alta",
+   "texto": "O corredor fica todo verde em até 2 s após o registro da emergência",
+   "verificacao": "Teste xUnit com relógio simulado",
+   "auto": true
+  },
+  {
+   "id": "RNF07",
+   "atributo": "Eficiência",
+   "prioridade": "Alta",
+   "texto": "O cálculo de uma rota leva no máximo 50 ms na malha de 20 cruzamentos",
+   "verificacao": "Teste xUnit com Stopwatch",
+   "auto": true
+  },
+  {
+   "id": "RNF08",
+   "atributo": "Eficiência",
+   "prioridade": "Média",
+   "texto": "A maquete mostra a troca de um semáforo em até 1 s",
+   "verificacao": "Roteiro de teste manual",
+   "auto": false
+  },
+  {
+   "id": "RNF09",
+   "atributo": "Usabilidade",
+   "prioridade": "Média",
+   "texto": "Registrar uma emergência leva no máximo 2 cliques",
+   "verificacao": "Roteiro de teste manual",
+   "auto": false
+  },
+  {
+   "id": "RNF10",
+   "atributo": "Usabilidade",
+   "prioridade": "Média",
+   "texto": "Rota, corredor, ocorrência e falha têm cor própria e aparecem na legenda",
+   "verificacao": "Roteiro de teste manual",
+   "auto": false
+  },
+  {
+   "id": "RNF11",
+   "atributo": "Manutenibilidade",
+   "prioridade": "Média",
+   "texto": "Cobertura de testes de 80% nas regras de negócio (RN01 a RN13)",
+   "verificacao": "Relatório do coverlet",
+   "auto": false
+  },
+  {
+   "id": "RNF12",
+   "atributo": "Manutenibilidade",
+   "prioridade": "Baixa",
+   "texto": "Tempos de verde, amarelo e atendimento e o tamanho da malha ficam no appsettings.json",
+   "verificacao": "Teste xUnit com configuração alterada",
+   "auto": true
+  },
+  {
+   "id": "RNF13",
+   "atributo": "Portabilidade",
+   "prioridade": "Baixa",
+   "texto": "Os testes passam em Windows e Linux, e a maquete abre no Chrome, Edge e Firefox",
+   "verificacao": "GitHub Actions e roteiro manual",
+   "auto": false
+  }
+ ],
+ "rastreabilidade": [
+  [
+   "UC01",
+   "RN07",
+   "RNF08",
+   "Médio"
+  ],
+  [
+   "UC02",
+   "RN01, RN02, RN03",
+   "RNF01, RNF02, RNF12",
+   "Crítico"
+  ],
+  [
+   "UC03",
+   "RN04, RN11, RN14, RN15",
+   "RNF04, RNF09",
+   "Alto"
+  ],
+  [
+   "UC04",
+   "RN04, RN05, RN06, RN14",
+   "RNF06, RNF07, RNF10",
+   "Crítico"
+  ],
+  [
+   "UC05",
+   "RN06, RN09, RN11, RN15",
+   "RNF06",
+   "Alto"
+  ],
+  [
+   "UC06",
+   "RN08, RN14",
+   "RNF01",
+   "Alto"
+  ],
+  [
+   "UC07",
+   "RN05, RN10, RN14",
+   "RNF07",
+   "Alto"
+  ],
+  [
+   "UC08",
+   "RN12, RN14",
+   "RNF01",
+   "Crítico"
+  ],
+  [
+   "UC09",
+   "RN13, RN14",
+   "RNF03, RNF10",
+   "Alto"
+  ],
+  [
+   "UC10",
+   "RN14",
+   "RNF05",
+   "Baixo"
+  ]
+ ]
+}

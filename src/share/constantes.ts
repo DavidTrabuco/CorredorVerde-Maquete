@@ -1,0 +1,14 @@
+export const W = 750
+export const H = 600
+export const B = 150
+export const M = 75
+export const RW = 36
+export const FAIXA = 9
+export const PARE = RW / 2 + 9
+export const VEL_VIATURA = 118
+export const CAUTELA_SEG = 1
+export const POLL_ESTADO_MS = 250
+export const POLL_LOG_MS = 500
+export const TENTATIVA_PODE_MS = 250
+export const QTD_CARROS_COMUNS = 6
+export const DISTANCIA_CARRO = 22

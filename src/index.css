@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/* Tokens de cor copiados da maquete de referência. O tema acompanha prefers-color-scheme. */
+:root {
+  --bg: #e8edf0;
+  --surface: #ffffff;
+  --surface-2: #f2f5f7;
+  --fg: #152027;
+  --muted: #586771;
+  --line: #d2dade;
+  --accent: #0a6c8c;
+  --accent-fg: #ffffff;
+  --sig-verde: #12985a;
+  --sig-amarelo: #d99a00;
+  --sig-vermelho: #d63c33;
+  --rota-amb: #1873d3;
+  --rota-bom: #df5f17;
+  --ocorrencia: #cf2347;
+  --map-chao: #d6ddd4;
+  --map-calcada: #e4e8e2;
+  --map-predio: #bfc8c4;
+  --map-predio-2: #aeb8b5;
+  --map-parque: #a7c99a;
+  --map-arvore: #82ad74;
+  --map-asfalto: #59636b;
+  --map-cruz: #646f77;
+  --map-faixa: #eef1f3;
+  --map-texto: #1f2d36;
+  --map-especial: #f6f7f8;
+  --f-display: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+  --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0e1317;
+    --surface: #151c21;
+    --surface-2: #1b242a;
+    --fg: #e1e7eb;
+    --muted: #92a1ab;
+    --line: #29343b;
+    --accent: #4ab3d8;
+    --accent-fg: #052330;
+    --sig-verde: #2ec46e;
+    --sig-amarelo: #f2b41c;
+    --sig-vermelho: #f0574d;
+    --rota-amb: #4ea4ff;
+    --rota-bom: #ff8a3d;
+    --ocorrencia: #ff4d6d;
+    --map-chao: #10171b;
+    --map-calcada: #1b2328;
+    --map-predio: #242e35;
+    --map-predio-2: #2b363e;
+    --map-parque: #1b2f22;
+    --map-arvore: #27452f;
+    --map-asfalto: #2f373e;
+    --map-cruz: #363f46;
+    --map-faixa: #7f8b92;
+    --map-texto: #c7d1d8;
+    --map-especial: #2d3a42;
+    color-scheme: dark;
+  }
+}
+
+/* Tokens disponíveis como classes Tailwind: bg-surface, text-muted, border-line... */
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
+  --color-sig-verde: var(--sig-verde);
+  --color-sig-amarelo: var(--sig-amarelo);
+  --color-sig-vermelho: var(--sig-vermelho);
+  --color-rota-amb: var(--rota-amb);
+  --color-rota-bom: var(--rota-bom);
+  --color-ocorrencia: var(--ocorrencia);
+  --color-map-chao: var(--map-chao);
+  --font-display: var(--f-display);
+  --font-body: var(--f-body);
+  --font-mono: var(--f-mono);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+button,
+select,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

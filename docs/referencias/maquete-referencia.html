@@ -1,0 +1,2088 @@
+<title>Maquete Corredor Verde</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: mesa de controle de tráfego. Maquete grande à esquerda com os controles logo abaixo;
+   à direita, o painel com Log, Requisitos e Testes. No celular tudo empilha. */
+:root {
+  --bg: #e8edf0;
+  --surface: #ffffff;
+  --surface-2: #f2f5f7;
+  --fg: #152027;
+  --muted: #586771;
+  --line: #d2dade;
+  --accent: #0a6c8c;
+  --accent-fg: #ffffff;
+  --sig-verde: #12985a;
+  --sig-amarelo: #d99a00;
+  --sig-vermelho: #d63c33;
+  --rota-amb: #1873d3;
+  --rota-bom: #df5f17;
+  --ocorrencia: #cf2347;
+  --map-chao: #d6ddd4;
+  --map-calcada: #e4e8e2;
+  --map-predio: #bfc8c4;
+  --map-predio-2: #aeb8b5;
+  --map-parque: #a7c99a;
+  --map-arvore: #82ad74;
+  --map-asfalto: #59636b;
+  --map-cruz: #646f77;
+  --map-faixa: #eef1f3;
+  --map-texto: #1f2d36;
+  --map-especial: #f6f7f8;
+  --f-display: "Barlow Semi Condensed", "Arial Narrow", sans-serif;
+  --f-body: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1317; --surface: #151c21; --surface-2: #1b242a; --fg: #e1e7eb; --muted: #92a1ab; --line: #29343b;
+    --accent: #4ab3d8; --accent-fg: #052330;
+    --sig-verde: #2ec46e; --sig-amarelo: #f2b41c; --sig-vermelho: #f0574d;
+    --rota-amb: #4ea4ff; --rota-bom: #ff8a3d; --ocorrencia: #ff4d6d;
+    --map-chao: #10171b; --map-calcada: #1b2328; --map-predio: #242e35; --map-predio-2: #2b363e; --map-parque: #1b2f22; --map-arvore: #27452f;
+    --map-asfalto: #2f373e; --map-cruz: #363f46; --map-faixa: #7f8b92; --map-texto: #c7d1d8; --map-especial: #2d3a42;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1317; --surface: #151c21; --surface-2: #1b242a; --fg: #e1e7eb; --muted: #92a1ab; --line: #29343b;
+  --accent: #4ab3d8; --accent-fg: #052330;
+  --sig-verde: #2ec46e; --sig-amarelo: #f2b41c; --sig-vermelho: #f0574d;
+  --rota-amb: #4ea4ff; --rota-bom: #ff8a3d; --ocorrencia: #ff4d6d;
+  --map-chao: #10171b; --map-calcada: #1b2328; --map-predio: #242e35; --map-predio-2: #2b363e; --map-parque: #1b2f22; --map-arvore: #27452f;
+  --map-asfalto: #2f373e; --map-cruz: #363f46; --map-faixa: #7f8b92; --map-texto: #c7d1d8; --map-especial: #2d3a42;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.45; }
+button, select, input { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { max-width: 1480px; margin: 0 auto; padding-inline: 16px; padding-block: 14px 24px; display: flex; flex-direction: column; gap: 14px; }
+
+.topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px; }
+.marca { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.sinal { display: grid; gap: 3px; padding: 5px 4px; background: var(--fg); border-radius: 6px; }
+.sinal i { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); opacity: .35; }
+.sinal i:nth-child(3) { background: var(--sig-verde); opacity: 1; box-shadow: 0 0 6px var(--sig-verde); }
+.marca h1 { margin: 0; font-family: var(--f-display); font-weight: 700; font-size: 1.6rem; letter-spacing: .01em; line-height: 1.05; text-wrap: balance; }
+.marca p { margin: 2px 0 0; color: var(--muted); font-size: .9rem; }
+.relogio-box { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.relogio-box .rot { font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+.relogio-box b { font-family: var(--f-mono); font-weight: 600; font-variant-numeric: tabular-nums; font-size: 1.05rem; min-width: 5ch; }
+
+.bt { border: 1px solid var(--line); background: var(--surface); border-radius: 8px; padding: 6px 12px; font-weight: 500; line-height: 1.2; }
+.bt:hover { border-color: var(--muted); }
+.bt.prim { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.bt.prim:hover { filter: brightness(1.08); }
+.bt[aria-pressed="true"] { background: var(--sig-amarelo); color: #1d1600; border-color: var(--sig-amarelo); }
+select.bt { padding-right: 8px; }
+
+.grade { display: grid; grid-template-columns: minmax(0, 1fr); gap: 14px; }
+@media (min-width: 1080px) { .grade { grid-template-columns: minmax(0, 1fr) minmax(330px, 410px); align-items: start; } }
+
+.palco { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.mapa-rolagem { overflow-x: auto; border-radius: 12px; }
+.mapa-wrap { position: relative; width: 100%; min-width: 560px; aspect-ratio: 5 / 4; max-width: 100%; border-radius: 12px; overflow: hidden; background: var(--map-chao); border: 1px solid var(--line); }
+#mapa { display: block; width: 100%; height: 100%; touch-action: manipulation; }
+#mapa.clicavel { cursor: crosshair; }
+.mapa-col { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.barra { display: flex; flex-direction: column; gap: 8px; }
+.aviso { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; background: var(--accent); color: var(--accent-fg); padding: 8px 8px 8px 14px; border-radius: 10px; font-weight: 500; font-size: .92rem; }
+.aviso button { border: 0; background: var(--accent-fg); color: var(--accent); border-radius: 8px; padding: 5px 12px; font-weight: 600; font-size: .85rem; }
+.toast { background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-left: 4px solid var(--sig-amarelo); padding: 8px 12px; font-size: .88rem; }
+
+.feed { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.feed li { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; font-size: .8rem; line-height: 1.35; display: flex; flex-direction: column; gap: 4px; min-width: 0; overflow-wrap: anywhere; }
+.feed li.alerta { border-color: color-mix(in srgb, var(--sig-amarelo) 60%, var(--line)); }
+.feed li.vazio-feed { color: var(--muted); grid-column: 1 / -1; }
+.feed .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.ir-req { display: none; }
+@media (max-width: 1079px) { .ir-req { display: inline-block; } }
+@media (prefers-reduced-motion: no-preference) { .feed li.novo { animation: entra .35s ease-out; } @keyframes entra { from { opacity: 0; } to { opacity: 1; } } }
+.controles { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+@media (min-width: 1280px) {
+  .palco { display: grid; grid-template-columns: 252px minmax(0, 1fr); align-items: start; }
+  .controles { order: -1; grid-template-columns: minmax(0, 1fr); }
+}
+.bloco { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.bloco-tit { font-family: var(--f-display); font-weight: 700; font-size: 1.02rem; letter-spacing: .02em; text-transform: uppercase; }
+.linha-status { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 2px 10px; border-radius: 999px; font-size: .82rem; font-weight: 600; background: var(--surface-2); border: 1px solid var(--line); max-width: 100%; }
+.pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--muted); }
+.pill.emerg { background: color-mix(in srgb, var(--ocorrencia) 14%, var(--surface)); border-color: color-mix(in srgb, var(--ocorrencia) 45%, var(--line)); }
+.pill.emerg::before { background: var(--ocorrencia); }
+.pill.atend { background: color-mix(in srgb, var(--sig-amarelo) 18%, var(--surface)); border-color: color-mix(in srgb, var(--sig-amarelo) 50%, var(--line)); }
+.pill.atend::before { background: var(--sig-amarelo); }
+.pill.ok::before { background: var(--sig-verde); }
+.info { font-size: .85rem; color: var(--muted); min-width: 0; overflow-wrap: anywhere; font-family: var(--f-mono); }
+.frota { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.frota li { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 8px; }
+.frota .vid { font-family: var(--f-mono); font-weight: 600; font-size: .8rem; min-width: 5.2ch; }
+.frota .info { flex-basis: 100%; font-size: .76rem; }
+.frota .info:empty { display: none; }
+.pill.res::before { background: var(--accent); }
+.dica { margin: 0; font-size: .82rem; color: var(--muted); }
+.campo { display: flex; flex-direction: column; gap: 4px; font-size: .82rem; color: var(--muted); }
+.botoes { display: flex; flex-wrap: wrap; gap: 8px; }
+.chk { display: flex; align-items: center; gap: 8px; font-size: .9rem; }
+
+.direcao { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; }
+.direcao .dica { flex: 1 1 120px; }
+.dpad { display: grid; grid-template-columns: repeat(3, 38px); grid-template-rows: repeat(3, 38px); gap: 4px; flex: none; }
+.dpad button { border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; font-size: 1rem; line-height: 1; padding: 0; }
+.dpad button:active { background: var(--accent); color: var(--accent-fg); }
+.dpad .n { grid-area: 1 / 2; } .dpad .o { grid-area: 2 / 1; } .dpad .p { grid-area: 2 / 2; font-size: .7rem; font-weight: 600; } .dpad .l { grid-area: 2 / 3; } .dpad .s { grid-area: 3 / 2; }
+
+.legenda { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 5px 10px; font-size: .82rem; color: var(--muted); }
+.legenda li { display: flex; align-items: center; gap: 7px; }
+.sw { flex: none; width: 18px; height: 6px; border-radius: 2px; }
+.sw.anel { width: 13px; height: 13px; border-radius: 50%; background: transparent; border: 2.5px solid var(--sig-verde); }
+.sw.pino { width: 12px; height: 12px; border-radius: 50%; }
+.sw.diam { width: 10px; height: 10px; transform: rotate(45deg); border-radius: 1px; margin: 0 4px; }
+
+.painel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; display: flex; flex-direction: column; min-width: 0; height: 74vh; }
+@media (min-width: 1080px) { .painel { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 12px); height: calc(100vh - 28px); max-height: 940px; } }
+.abas { display: flex; border-bottom: 1px solid var(--line); padding: 6px 6px 0; gap: 2px; flex: none; }
+.abas button { flex: 1; border: 0; background: transparent; padding: 9px 6px 10px; font-weight: 600; font-size: .92rem; color: var(--muted); border-bottom: 2.5px solid transparent; margin-bottom: -1px; }
+.abas button[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.abas .cont { font-family: var(--f-mono); font-size: .75rem; font-weight: 500; color: var(--muted); margin-left: 4px; }
+.aba-corpo { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.filtros { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; padding: 10px 12px; border-bottom: 1px solid var(--line); flex: none; }
+.filtros input[type="search"] { flex: 1 1 160px; min-width: 0; border: 1px solid var(--line); background: var(--surface-2); border-radius: 8px; padding: 6px 10px; font-size: .9rem; }
+.filtros .chk { font-size: .82rem; color: var(--muted); }
+.rolagem { flex: 1; min-height: 0; overflow-y: auto; }
+
+.log { list-style: none; margin: 0; padding: 0; }
+.log li { display: grid; grid-template-columns: 3.4em minmax(0, 1fr); gap: 2px 10px; padding: 8px 12px; border-bottom: 1px solid var(--line); border-left: 3px solid transparent; font-size: .86rem; }
+.log li.alerta { border-left-color: var(--sig-amarelo); }
+.log li.erro { border-left-color: var(--sig-vermelho); }
+.log li.api { color: var(--muted); }
+.log li.sis { border-left-color: var(--accent); }
+.log li.sis .msg { color: var(--muted); }
+.log time { grid-row: span 2; font-family: var(--f-mono); font-size: .76rem; color: var(--muted); padding-top: 2px; font-variant-numeric: tabular-nums; }
+.log .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.log .msg { overflow-wrap: anywhere; }
+.log li.api .msg { font-family: var(--f-mono); font-size: .76rem; }
+.chip { font-family: var(--f-mono); font-size: .7rem; font-weight: 600; padding: 1px 6px; border-radius: 4px; border: 0; background: color-mix(in srgb, var(--accent) 14%, var(--surface)); color: var(--fg); line-height: 1.5; }
+.chip.rn { background: color-mix(in srgb, var(--sig-verde) 18%, var(--surface)); }
+.chip.uc { background: color-mix(in srgb, var(--rota-amb) 16%, var(--surface)); }
+.chip.rnf { background: color-mix(in srgb, var(--sig-amarelo) 22%, var(--surface)); }
+.chip.api { background: var(--surface-2); color: var(--muted); }
+.vazio { padding: 28px 16px; text-align: center; color: var(--muted); font-size: .9rem; }
+
+.req-grupo { padding: 12px 12px 4px; font-family: var(--f-display); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; font-size: .88rem; color: var(--muted); position: sticky; top: 0; background: var(--surface); z-index: 1; border-bottom: 1px solid var(--line); }
+.req { display: grid; grid-template-columns: 5.6ch minmax(0, 1fr) auto; gap: 4px 10px; align-items: start; width: 100%; text-align: left; padding: 9px 12px; border: 0; border-bottom: 1px solid var(--line); background: transparent; font-size: .86rem; }
+.req:hover { background: var(--surface-2); }
+.req .rid { font-family: var(--f-mono); font-weight: 600; font-size: .78rem; padding-top: 1px; }
+.req .rtxt { min-width: 0; }
+.req .rst { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; font-size: .74rem; white-space: nowrap; font-family: var(--f-mono); }
+.req .obs { color: var(--muted); }
+.req .obs.sim { color: var(--fg); }
+.tst { padding: 0 6px; border-radius: 4px; font-weight: 600; }
+.tst.ok { background: color-mix(in srgb, var(--sig-verde) 20%, var(--surface)); }
+.tst.falha { background: color-mix(in srgb, var(--sig-vermelho) 22%, var(--surface)); }
+.tst.man { background: var(--surface-2); color: var(--muted); font-weight: 500; }
+.nota { margin: 0; padding: 10px 12px; font-size: .82rem; color: var(--muted); border-bottom: 1px solid var(--line); }
+
+.tes-topo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; padding: 12px; border-bottom: 1px solid var(--line); flex: none; }
+.placar { font-family: var(--f-display); font-weight: 700; font-size: 1.15rem; }
+.placar.ok { color: var(--sig-verde); }
+.placar.falha { color: var(--sig-vermelho); }
+.teste { padding: 10px 12px; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 3px 8px; font-size: .84rem; }
+.teste .ic { grid-row: span 3; width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; font-size: .75rem; font-weight: 700; color: #fff; background: var(--sig-verde); }
+.teste.falhou .ic { background: var(--sig-vermelho); }
+.teste .tnome { font-family: var(--f-mono); font-weight: 600; font-size: .78rem; overflow-wrap: anywhere; }
+.teste .tnome span { font-weight: 400; color: var(--muted); }
+.teste .tdet { color: var(--muted); }
+.teste .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div class="app">
+  <header class="topo">
+    <div class="marca">
+      <div class="sinal" aria-hidden="true"><i></i><i></i><i></i></div>
+      <div>
+        <h1>Maquete Corredor Verde</h1>
+        <p>Playground da lógica do A3 · Gestão Dinâmica de Tráfego e Preferência para Emergências</p>
+      </div>
+    </div>
+    <div class="relogio-box">
+      <span class="rot">Tempo simulado</span>
+      <b id="relogio">00:00</b>
+      <button class="bt" id="btPausa" type="button">Pausar</button>
+      <select class="bt" id="selVel" aria-label="Velocidade da simulação">
+        <option value="1">1×</option>
+        <option value="2">2×</option>
+        <option value="4">4×</option>
+      </select>
+      <button class="bt" id="btReiniciar" type="button">Reiniciar</button>
+      <button class="bt ir-req" id="btIrReq" type="button">Ver requisitos ↓</button>
+    </div>
+  </header>
+
+  <main class="grade">
+    <section class="palco" aria-label="Maquete">
+      <div class="mapa-col">
+      <div class="mapa-rolagem"><div class="mapa-wrap" id="mapaWrap">
+        <canvas id="mapa" role="img" aria-label="Maquete da cidade com 20 cruzamentos, semáforos, a ambulância, os bombeiros e dois hospitais"></canvas>
+      </div></div>
+      <div class="barra">
+        <div class="aviso" id="aviso" hidden><span id="avisoTxt"></span><button type="button" id="btCancelar">Cancelar</button></div>
+        <div class="toast" id="toast" hidden></div>
+        <ol class="feed" id="feed" aria-live="polite" aria-label="Regras agindo agora"></ol>
+      </div>
+      </div>
+
+      <div class="controles">
+        <div class="bloco">
+          <div class="bloco-tit">Viaturas</div>
+          <ul class="frota" id="frota"></ul>
+        </div>
+
+        <div class="bloco">
+          <div class="bloco-tit">Dirigir a AMB-01</div>
+          <div class="direcao">
+            <div class="dpad" aria-label="Direção da ambulância">
+              <button type="button" class="n" data-dir="N" aria-label="Norte">↑</button>
+              <button type="button" class="o" data-dir="O" aria-label="Oeste">←</button>
+              <button type="button" class="p" data-dir="PARAR" aria-label="Parar">PARE</button>
+              <button type="button" class="l" data-dir="L" aria-label="Leste">→</button>
+              <button type="button" class="s" data-dir="S" aria-label="Sul">↓</button>
+            </div>
+            <p class="dica">Setas ou WASD assumem a direção. Espaço para no próximo cruzamento.</p>
+          </div>
+          <label class="chk"><input type="checkbox" id="chkManual"> Eu dirijo a AMB-01</label>
+        </div>
+
+        <div class="bloco">
+          <div class="bloco-tit">Registrar emergência</div>
+          <label class="campo" for="selCrit">Criticidade
+            <select class="bt" id="selCrit">
+              <option value="1">1 · Risco de vida</option>
+              <option value="2" selected>2 · Urgente</option>
+              <option value="3">3 · Padrão</option>
+            </select>
+          </label>
+          <div class="botoes">
+            <button type="button" class="bt prim" id="btAmb">Emergência da ambulância</button>
+            <button type="button" class="bt prim" id="btBom">Emergência dos bombeiros</button>
+          </div>
+          <p class="dica">Depois do botão, clique no cruzamento da ocorrência. Vai a viatura livre mais perto do local: a da patrulha ou, se for perto da base, a de reserva.</p>
+        </div>
+
+        <div class="bloco">
+          <div class="bloco-tit">Falhas e legenda</div>
+          <div class="botoes">
+            <button type="button" class="bt" id="btFalha" aria-pressed="false">Simular falha</button>
+            <button type="button" class="bt" id="btLimpar">Desligar todas</button>
+          </div>
+          <ul class="legenda">
+            <li><span class="sw" style="background:var(--sig-verde)"></span>Faixa verde</li>
+            <li><span class="sw" style="background:var(--sig-vermelho)"></span>Faixa vermelha</li>
+            <li><span class="sw" style="background:var(--rota-amb)"></span>Rota da ambulância</li>
+            <li><span class="sw" style="background:var(--rota-bom)"></span>Rota dos bombeiros</li>
+            <li><span class="sw anel"></span>Corredor aberto</li>
+            <li><span class="sw pino" style="background:var(--ocorrencia)"></span>Ocorrência</li>
+            <li><span class="sw diam" style="background:var(--sig-amarelo)"></span>Semáforo em falha</li>
+            <li><span class="sw" style="background:var(--rota-amb);opacity:.45"></span>Trecho até o hospital</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <aside class="painel" id="painel" aria-label="Log, requisitos e testes">
+      <div class="abas" role="tablist">
+        <button type="button" role="tab" id="abaLog" aria-selected="true" aria-controls="corpoLog">Log<span class="cont" id="nLog"></span></button>
+        <button type="button" role="tab" id="abaReq" aria-selected="false" aria-controls="corpoReq">Requisitos</button>
+        <button type="button" role="tab" id="abaTes" aria-selected="false" aria-controls="corpoTes">Testes<span class="cont" id="nTes"></span></button>
+      </div>
+
+      <div class="aba-corpo" id="corpoLog" role="tabpanel">
+        <div class="filtros">
+          <input type="search" id="filtro" placeholder="Filtrar: RN06, UC04, C13, AMB-01…" aria-label="Filtrar o log">
+          <label class="chk"><input type="checkbox" id="chkApi"> Chamadas da API</label>
+        </div>
+        <div class="rolagem"><ol class="log" id="listaLog"></ol></div>
+      </div>
+
+      <div class="aba-corpo" id="corpoReq" role="tabpanel" hidden>
+        <p class="nota">Mesmos IDs do documento da 1ª entrega. "Maquete" conta quantas vezes a regra agiu nesta sessão; "teste" é o resultado da aba Testes. Clique numa linha para ver os eventos dela no log.</p>
+        <div class="rolagem" id="listaReq"></div>
+      </div>
+
+      <div class="aba-corpo" id="corpoTes" role="tabpanel" hidden>
+        <div class="tes-topo">
+          <span class="placar" id="placar">Rodando…</span>
+          <button type="button" class="bt" id="btTestes">Rodar de novo</button>
+        </div>
+        <p class="nota">Cada teste monta um cenário novo, avança um relógio simulado e confere a regra. No projeto C#, cada um vira um método [Fact] do xUnit com o mesmo nome.</p>
+        <div class="rolagem" id="listaTes"></div>
+      </div>
+    </aside>
+  </main>
+</div>
+
+<script>
+window.REQS = {"malha": {"colunas": 5, "linhas": 4, "hospitais": [{"id": "H1", "nome": "Hospital Norte", "no": "C3"}, {"id": "H2", "nome": "Hospital Sul", "no": "C18"}], "bases": [{"nome": "Base do SAMU", "no": "C11", "tipo": "AMBULANCIA"}, {"nome": "Quartel dos Bombeiros", "no": "C20", "tipo": "BOMBEIROS"}], "viaturas": [{"id": "AMB-01", "tipo": "AMBULANCIA", "base": "C11", "papel": "PATRULHA"}, {"id": "AMB-02", "tipo": "AMBULANCIA", "base": "C11", "papel": "RESERVA"}, {"id": "BOM-01", "tipo": "BOMBEIROS", "base": "C20", "papel": "PATRULHA"}, {"id": "BOM-02", "tipo": "BOMBEIROS", "base": "C20", "papel": "RESERVA"}]}, "config": {"verdeSeg": 8, "amareloSeg": 2, "atendimentoSeg": 4, "cautelaSeg": 1}, "atores": [{"nome": "Usuário da maquete", "tipo": "Humano", "papel": "Registra emergências, pode assumir a direção da AMB-01, simula falhas e consulta o log"}, {"nome": "Temporizador", "tipo": "Tempo", "papel": "Avança o relógio da simulação: ciclo dos semáforos e tempo de atendimento"}], "rn": [{"id": "RN01", "texto": "Em um cruzamento, as direções Norte-Sul e Leste-Oeste nunca ficam em verde ao mesmo tempo."}, {"id": "RN02", "texto": "Toda troca de verde para vermelho passa por amarelo de 2 s."}, {"id": "RN03", "texto": "Fora de um corredor, cada semáforo alterna as direções em ciclo fixo: 8 s de verde e 2 s de amarelo para cada uma."}, {"id": "RN04", "texto": "Ao registrar uma emergência da ambulância, a rota tem dois trechos: da posição atual até o local da ocorrência e, de lá, até o hospital mais próximo."}, {"id": "RN05", "texto": "Cada trecho segue o menor caminho pelas ruas, contado em quarteirões, sem passar por semáforos em falha."}, {"id": "RN06", "texto": "Ao iniciar um trecho, todos os cruzamentos dele abrem corredor verde: ficam verdes na direção em que a viatura vai chegar. O trecho até o hospital abre quando o atendimento termina."}, {"id": "RN07", "texto": "Nenhuma viatura ou carro comum atravessa um cruzamento com vermelho ou amarelo; quem chega espera o verde."}, {"id": "RN08", "texto": "Depois que a viatura passa por um cruzamento do corredor, ele volta ao ciclo normal."}, {"id": "RN09", "texto": "No local da ocorrência, a viatura fica 4 s em atendimento. A ambulância então segue ao hospital; ao chegar, a ocorrência é encerrada."}, {"id": "RN10", "texto": "Se a viatura sair da rota, a rota é recalculada a partir da posição atual, e os cruzamentos que saíram do trajeto voltam ao ciclo normal."}, {"id": "RN11", "texto": "A viatura dos bombeiros segue apenas até o local da ocorrência; só a ambulância segue ao hospital."}, {"id": "RN12", "texto": "Quando dois corredores pedem direções diferentes no mesmo cruzamento, passa primeiro a ocorrência de maior criticidade (1 risco de vida, 2 urgente, 3 padrão); em empate, a registrada primeiro."}, {"id": "RN13", "texto": "Um semáforo em falha fica em amarelo piscante: os veículos param e seguem com cautela, e as rotas de emergência desviam dele. Sem caminho possível, a viatura é avisada e aguarda."}, {"id": "RN14", "texto": "Toda ocorrência, abertura e liberação de corredor, desvio, conflito e falha é registrada no log de eventos."}, {"id": "RN15", "texto": "A emergência vai para a viatura livre do tipo pedido mais perto do local (menor caminho em quarteirões): a da patrulha, se ela estiver mais perto, ou a de reserva, se o local for mais perto da base; em empate, vai a da patrulha. Sem viatura livre, o pedido é recusado. Ao terminar o serviço, a viatura da patrulha volta a patrulhar de onde está, e a de reserva volta para a base sem corredor verde."}], "uc": [{"id": "UC01", "nome": "Dirigir ou patrulhar", "ator": "Usuário da maquete", "resumo": "As viaturas livres circulam sozinhas; o usuário pode assumir a AMB-01", "principal": ["Sem ninguém dirigindo, a viatura livre escolhe uma rua ao acaso em cada cruzamento.", "A viatura segue até o próximo cruzamento, respeitando o semáforo (RN07), e informa a chegada à API.", "O usuário pode assumir a AMB-01 com as setas ou os botões da tela e dirigir para onde quiser."], "secundarios": ["Semáforo fechado na direção da viatura: ela para na faixa e espera o verde (RN07).", "O usuário desmarca \"Eu dirijo a AMB-01\": ela volta a patrulhar sozinha."]}, {"id": "UC02", "nome": "Operar o ciclo dos semáforos", "ator": "Temporizador", "resumo": "Alterna as direções de cada cruzamento no tempo certo", "principal": ["O temporizador avança o relógio da simulação.", "O sistema troca a fase dos cruzamentos que completaram o tempo de verde ou de amarelo (RN02, RN03).", "A maquete consulta a API e mostra as novas cores."], "secundarios": ["Cruzamento em corredor: a fase fica parada no verde da viatura (RN06).", "Cruzamento em falha: fica em amarelo piscante (RN13)."]}, {"id": "UC03", "nome": "Registrar emergência", "ator": "Usuário da maquete", "resumo": "Escolhe a criticidade e clica no local da ocorrência no mapa", "principal": ["O usuário escolhe a criticidade e clica em \"Emergência da ambulância\" ou \"Emergência dos bombeiros\".", "O usuário clica no cruzamento da ocorrência.", "O sistema valida os dados, escolhe a viatura livre mais perto do local (RN15) e registra a ocorrência."], "secundarios": ["A viatura de reserva está mais perto que a da patrulha: a reserva sai da base e atende (RN15).", "Nenhuma viatura livre do tipo pedido: o pedido é recusado com aviso.", "Cruzamento inexistente, criticidade fora de 1 a 3 ou tipo de viatura inválido: o pedido é recusado (RNF04)."]}, {"id": "UC04", "nome": "Abrir corredor verde", "ator": "Usuário da maquete", "resumo": "Calcula a rota e abre todos os cruzamentos do trecho", "principal": ["O sistema calcula os dois trechos da rota (RN04, RN05).", "O sistema abre o corredor em todos os cruzamentos do primeiro trecho (RN06).", "A maquete mostra a rota e os cruzamentos abertos."], "secundarios": ["Outro corredor pede direção diferente em um cruzamento: segue para o UC08.", "Sem caminho possível: a viatura é avisada e aguarda (RN13)."]}, {"id": "UC05", "nome": "Atender a ocorrência e encerrar", "ator": "Temporizador", "resumo": "Atendimento no local, trecho até o hospital e fim do serviço", "principal": ["A viatura chega ao local da ocorrência.", "O sistema conta 4 s de atendimento (RN09).", "O sistema abre o corredor do trecho até o hospital.", "Ao chegar ao hospital, o sistema encerra a ocorrência."], "secundarios": ["Viatura dos bombeiros: a ocorrência é encerrada no próprio local (RN11).", "Viatura da patrulha: ao terminar, volta a patrulhar de onde está (RN15).", "Viatura de reserva: ao terminar, volta para a base sem corredor e fica estacionada (RN15)."]}, {"id": "UC06", "nome": "Liberar cruzamento", "ator": "Usuário da maquete", "resumo": "O cruzamento volta ao ciclo normal depois da passagem", "principal": ["A viatura informa que chegou a um cruzamento do corredor.", "O sistema retira a reserva do corredor naquele cruzamento (RN08).", "O cruzamento volta ao ciclo normal."], "secundarios": ["Cruzamento ainda reservado por outra viatura: segue o corredor dela."]}, {"id": "UC07", "nome": "Recalcular rota", "ator": "Usuário da maquete", "resumo": "A viatura saiu da rota e o trajeto é refeito", "principal": ["A viatura sai de um cruzamento por uma rua fora da rota.", "O sistema recalcula o trecho a partir do próximo cruzamento (RN10).", "O sistema abre o novo corredor e libera os cruzamentos que saíram do trajeto."], "secundarios": ["Ninguém está dirigindo a AMB-01: a viatura segue a rota sozinha e não sai dela."]}, {"id": "UC08", "nome": "Resolver conflito entre emergências", "ator": "Usuário da maquete", "resumo": "Dois corredores pedem direções diferentes no mesmo cruzamento", "principal": ["Um segundo corredor reserva um cruzamento já reservado em outra direção.", "O sistema compara a criticidade das ocorrências (RN12).", "O cruzamento abre para a de maior prioridade; a outra viatura espera no vermelho."], "secundarios": ["Criticidades iguais: passa a ocorrência registrada primeiro.", "Corredores na mesma direção: não há conflito, o cruzamento fica verde para os dois."]}, {"id": "UC09", "nome": "Simular falha de semáforo", "ator": "Usuário da maquete", "resumo": "Liga ou desliga a falha de um cruzamento com um clique", "principal": ["O usuário clica em \"Simular falha\" e depois em um cruzamento.", "O sistema coloca o semáforo em amarelo piscante (RN13).", "O sistema recalcula as rotas de emergência que passavam por ele."], "secundarios": ["Clique em um cruzamento já em falha: a falha é desligada e o ciclo normal recomeça."]}, {"id": "UC10", "nome": "Consultar log de eventos", "ator": "Usuário da maquete", "resumo": "Painel com os eventos e a regra que cada um cumpre", "principal": ["O usuário abre a aba Log.", "O sistema lista os eventos do mais recente ao mais antigo, com a regra de cada um.", "O usuário filtra por um requisito."], "secundarios": ["Nenhum evento no filtro: o painel informa que não há registros."]}], "criticos": ["UC02", "UC04", "UC06", "UC07", "UC08", "UC09"], "rnf": [{"id": "RNF01", "atributo": "Confiabilidade", "prioridade": "Crítica", "texto": "Nenhum cenário de teste resulta em verde nas duas direções de um cruzamento ao mesmo tempo", "verificacao": "Teste xUnit sobre a RN01 e simulação do RNF02", "auto": true}, {"id": "RNF02", "atributo": "Confiabilidade", "prioridade": "Crítica", "texto": "Uma simulação de 1 hora (tempo simulado) com emergências e falhas aleatórias roda sem exceção e sem violar a RN01 e a RN02", "verificacao": "Teste xUnit com relógio simulado", "auto": true}, {"id": "RNF03", "atributo": "Confiabilidade", "prioridade": "Alta", "texto": "Sem caminho possível, o sistema avisa a viatura e continua funcionando", "verificacao": "Teste xUnit com cruzamentos bloqueados", "auto": true}, {"id": "RNF04", "atributo": "Segurança", "prioridade": "Alta", "texto": "A API recusa dados inválidos (cruzamento inexistente, criticidade fora de 1 a 3, tipo de viatura inválido) e pedidos sem viatura livre, sem alterar o estado", "verificacao": "Testes de integração", "auto": true}, {"id": "RNF05", "atributo": "Segurança", "prioridade": "Média", "texto": "O log de eventos não pode ser editado nem apagado pela API", "verificacao": "Teste de integração", "auto": true}, {"id": "RNF06", "atributo": "Eficiência", "prioridade": "Alta", "texto": "O corredor fica todo verde em até 2 s após o registro da emergência", "verificacao": "Teste xUnit com relógio simulado", "auto": true}, {"id": "RNF07", "atributo": "Eficiência", "prioridade": "Alta", "texto": "O cálculo de uma rota leva no máximo 50 ms na malha de 20 cruzamentos", "verificacao": "Teste xUnit com Stopwatch", "auto": true}, {"id": "RNF08", "atributo": "Eficiência", "prioridade": "Média", "texto": "A maquete mostra a troca de um semáforo em até 1 s", "verificacao": "Roteiro de teste manual", "auto": false}, {"id": "RNF09", "atributo": "Usabilidade", "prioridade": "Média", "texto": "Registrar uma emergência leva no máximo 2 cliques", "verificacao": "Roteiro de teste manual", "auto": false}, {"id": "RNF10", "atributo": "Usabilidade", "prioridade": "Média", "texto": "Rota, corredor, ocorrência e falha têm cor própria e aparecem na legenda", "verificacao": "Roteiro de teste manual", "auto": false}, {"id": "RNF11", "atributo": "Manutenibilidade", "prioridade": "Média", "texto": "Cobertura de testes de 80% nas regras de negócio (RN01 a RN13)", "verificacao": "Relatório do coverlet", "auto": false}, {"id": "RNF12", "atributo": "Manutenibilidade", "prioridade": "Baixa", "texto": "Tempos de verde, amarelo e atendimento e o tamanho da malha ficam no appsettings.json", "verificacao": "Teste xUnit com configuração alterada", "auto": true}, {"id": "RNF13", "atributo": "Portabilidade", "prioridade": "Baixa", "texto": "Os testes passam em Windows e Linux, e a maquete abre no Chrome, Edge e Firefox", "verificacao": "GitHub Actions e roteiro manual", "auto": false}], "rastreabilidade": [["UC01", "RN07", "RNF08", "Médio"], ["UC02", "RN01, RN02, RN03", "RNF01, RNF02, RNF12", "Crítico"], ["UC03", "RN04, RN11, RN14, RN15", "RNF04, RNF09", "Alto"], ["UC04", "RN04, RN05, RN06, RN14", "RNF06, RNF07, RNF10", "Crítico"], ["UC05", "RN06, RN09, RN11, RN15", "RNF06", "Alto"], ["UC06", "RN08, RN14", "RNF01", "Alto"], ["UC07", "RN05, RN10, RN14", "RNF07", "Alto"], ["UC08", "RN12, RN14", "RNF01", "Crítico"], ["UC09", "RN13, RN14", "RNF03, RNF10", "Alto"], ["UC10", "RN14", "RNF05", "Baixo"]]};
+</script>
+<script>
+/* =====================================================================
+   CAMADA "BACKEND" — é isto que vocês vão escrever em C# (ASP.NET Core).
+   Cada classe/função abaixo corresponde a uma entidade, regra ou endpoint.
+   ===================================================================== */
+(function (raiz) {
+  const REQS = raiz.REQS;
+
+  // appsettings.json (RNF12)
+  const CONFIG_PADRAO = Object.assign({
+    colunas: REQS.malha.colunas,
+    linhas: REQS.malha.linhas
+  }, REQS.config);
+
+  const DIRS = {
+    N: { dx: 0, dy: -1, eixo: 'NS' },
+    S: { dx: 0, dy: 1, eixo: 'NS' },
+    L: { dx: 1, dy: 0, eixo: 'LO' },
+    O: { dx: -1, dy: 0, eixo: 'LO' }
+  };
+  const OPOSTO = { N: 'S', S: 'N', L: 'O', O: 'L' };
+  const NOME_EIXO = { NS: 'Norte-Sul', LO: 'Leste-Oeste' };
+
+  // TimeProvider: nos testes o relógio é avançado sem esperar de verdade
+  class Relogio {
+    constructor() { this.agora = 0; }
+    avancar(seg) { this.agora += seg; }
+  }
+
+  class ErroApi extends Error {
+    constructor(status, mensagem) { super(mensagem); this.status = status; }
+  }
+
+  class Sistema {
+    constructor(config) {
+      this.cfg = Object.assign({}, CONFIG_PADRAO, config || {});
+      this.relogio = new Relogio();
+      this.cruzamentos = new Map();
+      for (let lin = 0; lin < this.cfg.linhas; lin++) {
+        for (let col = 0; col < this.cfg.colunas; col++) {
+          const id = this.idDe(col, lin);
+          // fases defasadas para a malha não trocar toda de uma vez
+          const defasagem = ((col * 3 + lin * 5) % 10);
+          this.cruzamentos.set(id, {
+            id, col, lin,
+            semaforo: { eixo: (col + lin) % 2 === 0 ? 'NS' : 'LO', estado: 'VERDE', desde: -defasagem, falha: false },
+            reservas: []
+          });
+        }
+      }
+      this.hospitais = REQS.malha.hospitais.filter(h => this.cruzamentos.has(h.no));
+      this.viaturas = new Map();
+      this.bases = REQS.malha.bases;
+      for (const b of REQS.malha.viaturas) {
+        const no = this.cruzamentos.has(b.base) ? b.base : this.idDe(0, 0);
+        this.viaturas.set(b.id, {
+          id: b.id, tipo: b.tipo, papel: b.papel, base: no, no, indo: null,
+          modo: b.papel === 'RESERVA' ? 'RESERVA' : 'PATRULHA', ocorrencia: null, trecho: 0, destino: null,
+          rota: [], previsao: [], semRota: false, atendimentoAte: null, proximaTentativa: 0
+        });
+      }
+      this.ocorrencias = [];
+      this.seqOcorrencia = 0;
+      this.log = [];
+      this.seqLog = 0;
+      this.contagem = {};
+      this.jaLogado = new Set();
+    }
+
+    get t() { return this.relogio.agora; }
+    idDe(col, lin) { return 'C' + (lin * this.cfg.colunas + col + 1); }
+
+    // ---------- log de eventos (RN14) ----------
+    registrar(tags, mensagem, tipo) {
+      const e = { seq: ++this.seqLog, t: this.t, tags, mensagem, tipo: tipo || 'evento' };
+      this.log.push(e);
+      if (this.log.length > 3000) this.log.splice(0, this.log.length - 3000);
+      for (const tag of tags) this.contar(tag);
+      if (tipo !== 'api' && tags.some(x => x !== 'API')) this.contar('RN14');
+      return e;
+    }
+    contar(tag, n) { this.contagem[tag] = (this.contagem[tag] || 0) + (n || 1); }
+
+    // ---------- malha ----------
+    cruzamento(id) {
+      const c = this.cruzamentos.get(id);
+      if (!c) throw new ErroApi(400, `Cruzamento ${id} não existe na malha.`);
+      return c;
+    }
+    vizinho(id, dir) {
+      const c = this.cruzamento(id), d = DIRS[dir];
+      const col = c.col + d.dx, lin = c.lin + d.dy;
+      if (col < 0 || lin < 0 || col >= this.cfg.colunas || lin >= this.cfg.linhas) return null;
+      return this.idDe(col, lin);
+    }
+    direcaoEntre(a, b) {
+      for (const d of ['N', 'L', 'S', 'O']) if (this.vizinho(a, d) === b) return d;
+      return null;
+    }
+
+    // ---------- semáforos (RN01, RN02, RN03, RN13) ----------
+    luz(id, eixo) {
+      const s = this.cruzamento(id).semaforo;
+      if (s.falha) return 'PISCANTE';
+      return s.eixo === eixo ? s.estado : 'VERMELHO';
+    }
+    vencedor(c) {
+      if (!c.reservas.length) return null;
+      return c.reservas.slice().sort((a, b) => a.criticidade - b.criticidade || a.ordem - b.ordem)[0];
+    }
+    trocarFase(s) {
+      s.eixo = s.eixo === 'NS' ? 'LO' : 'NS';
+      s.estado = 'VERDE';
+      s.desde = this.t;
+      this.contar('UC02');
+      this.contar('RN01');
+    }
+    atualizarSemaforo(c) {
+      const s = c.semaforo, cfg = this.cfg, t = this.t, eps = 1e-9;
+      if (s.falha) return;
+      const w = this.vencedor(c);
+      if (w) {
+        if (s.eixo === w.eixo) {
+          // amarelo da direção do corredor volta ao verde: ninguém perde o verde, RN02 continua valendo
+          if (s.estado === 'AMARELO') { s.estado = 'VERDE'; s.desde = t; }
+          return;
+        }
+        if (s.estado === 'VERDE') { s.estado = 'AMARELO'; s.desde = t; this.contar('RN02'); return; }
+        if (t - s.desde >= cfg.amareloSeg - eps) this.trocarFase(s);
+        return;
+      }
+      if (s.estado === 'VERDE' && t - s.desde >= cfg.verdeSeg - eps) {
+        s.estado = 'AMARELO'; s.desde = t; this.contar('RN02');
+      } else if (s.estado === 'AMARELO' && t - s.desde >= cfg.amareloSeg - eps) {
+        this.trocarFase(s); this.contar('RN03');
+      }
+    }
+
+    // RN07: só atravessa com verde; com falha passa com cautela (RN13)
+    podeAtravessar(id, eixo, viaturaId) {
+      const l = this.luz(id, eixo);
+      if (l === 'VERDE') return { pode: true, luz: l };
+      if (l === 'PISCANTE') return { pode: true, cautela: true, luz: l };
+      const chave = `espera:${viaturaId}:${id}`;
+      const vEsp = viaturaId ? this.viaturas.get(viaturaId) : null;
+      if (!vEsp || vEsp.modo !== 'EMERGENCIA') { this.contar('RN07'); return { pode: false, luz: l }; }
+      if (!this.jaLogado.has(chave)) {
+        this.jaLogado.add(chave);
+        this.registrar(['RN07', 'UC01'], `${viaturaId} parou na faixa de ${id}: ${l.toLowerCase()} para ${NOME_EIXO[eixo]}. Espera o verde.`);
+      }
+      return { pode: false, luz: l };
+    }
+
+    // ---------- rotas (RN05) ----------
+    menorCaminho(origem, destino) {
+      this.cruzamento(origem); this.cruzamento(destino);
+      if (origem === destino) return [];
+      const anterior = new Map([[origem, null]]);
+      const fila = [origem];
+      while (fila.length) {
+        const atual = fila.shift();
+        for (const d of ['N', 'L', 'S', 'O']) {
+          const v = this.vizinho(atual, d);
+          if (!v || anterior.has(v)) continue;
+          if (v !== destino && this.cruzamentos.get(v).semaforo.falha) continue;
+          anterior.set(v, atual);
+          if (v === destino) {
+            const caminho = [];
+            for (let x = destino; x !== origem; x = anterior.get(x)) caminho.unshift(x);
+            return caminho;
+          }
+          fila.push(v);
+        }
+      }
+      return null;
+    }
+    montarRota(origem, caminho) {
+      const rota = [];
+      let ant = origem;
+      for (const no of caminho) {
+        rota.push({ no, eixo: DIRS[this.direcaoEntre(ant, no)].eixo });
+        ant = no;
+      }
+      return rota;
+    }
+    hospitalMaisProximo(no) {
+      let melhor = null;
+      for (const h of this.hospitais) {
+        const c = this.menorCaminho(no, h.no);
+        if (c && (!melhor || c.length < melhor.dist)) melhor = { hospital: h, dist: c.length };
+      }
+      return melhor ? melhor.hospital : null;
+    }
+
+    // ---------- ocorrências (UC03) ----------
+    registrarOcorrencia(dados) {
+      dados = dados || {};
+      if (dados.tipo !== 'AMBULANCIA' && dados.tipo !== 'BOMBEIROS') throw new ErroApi(400, `Tipo de viatura ${dados.tipo} inválido: use AMBULANCIA ou BOMBEIROS.`);
+      this.cruzamento(dados.cruzamento);
+      const crit = Number(dados.criticidade);
+      if (!Number.isInteger(crit) || crit < 1 || crit > 3) throw new ErroApi(400, `Criticidade ${dados.criticidade} inválida: use 1, 2 ou 3.`);
+      const escolha = this.escolherViatura(dados.tipo, dados.cruzamento);
+      if (!escolha) {
+        const nomes = [...this.viaturas.values()].filter(x => x.tipo === dados.tipo).map(x => x.id).join(' e ');
+        throw new ErroApi(409, `${nomes} estão ocupadas. Espere uma delas terminar.`);
+      }
+      const v = escolha.viatura;
+      const q = n => n === Infinity ? 'sem caminho' : `${n} ${n === 1 ? 'quarteirão' : 'quarteirões'}`;
+      const outras = escolha.outras.map(o => `${o.viatura.id} a ${q(o.dist)}`).join(', ');
+      const saida = v.modo === 'RESERVA' ? ', sai da reserva' : v.modo === 'RETORNO' ? ', estava voltando à base' : '';
+      this.registrar(['RN15', 'UC03'], `${v.id} é a viatura livre mais perto de ${dados.cruzamento} (${q(escolha.dist)}${outras ? '; ' + outras : ''})${saida}.`);
+      if (v.modo === 'RETORNO') v.rota = [];
+      v.semRota = false;
+
+      const oc = {
+        id: 'OC-' + String(++this.seqOcorrencia).padStart(3, '0'),
+        no: dados.cruzamento, criticidade: crit, viaturaId: v.id, ordem: this.seqOcorrencia,
+        status: 'A_CAMINHO', registradaEm: this.t, hospital: null
+      };
+      this.ocorrencias.push(oc);
+      v.modo = 'EMERGENCIA'; v.ocorrencia = oc; v.trecho = 1; v.destino = oc.no;
+      if (v.tipo === 'AMBULANCIA') {
+        oc.hospital = this.hospitalMaisProximo(oc.no);
+        const c = oc.hospital ? this.menorCaminho(oc.no, oc.hospital.no) : null;
+        v.previsao = c ? [oc.no].concat(c) : [];
+        this.registrar(['UC03', 'RN04'], `${oc.id} registrada em ${oc.no} (criticidade ${crit}) para ${v.id}. Trechos: ${v.indo || v.no} → ${oc.no} → ${oc.hospital ? oc.hospital.nome : 'sem hospital alcançável'}.`);
+      } else {
+        v.previsao = [];
+        this.registrar(['UC03', 'RN11'], `${oc.id} registrada em ${oc.no} (criticidade ${crit}) para ${v.id}. Bombeiros vão só até o local.`);
+      }
+      this.iniciarTrecho(v);
+      return oc;
+    }
+
+    // RN15: vai a viatura livre mais perto do local; em empate, a da patrulha
+    escolherViatura(tipo, destino) {
+      const livres = [...this.viaturas.values()].filter(v => v.tipo === tipo && ['PATRULHA', 'RESERVA', 'RETORNO'].includes(v.modo));
+      if (!livres.length) return null;
+      const lista = livres.map(v => {
+        const c = this.menorCaminho(v.indo || v.no, destino);
+        return { viatura: v, dist: c === null ? Infinity : c.length + (v.indo ? 1 : 0) };
+      }).sort((a, b) => a.dist - b.dist || (a.viatura.papel === 'PATRULHA' ? -1 : 1) - (b.viatura.papel === 'PATRULHA' ? -1 : 1) || a.viatura.id.localeCompare(b.viatura.id));
+      return { viatura: lista[0].viatura, dist: lista[0].dist, outras: lista.slice(1) };
+    }
+
+    // RN15: a reserva volta para a base sem corredor
+    iniciarRetorno(v) {
+      v.modo = 'RETORNO'; v.ocorrencia = null; v.trecho = 0; v.destino = v.base; v.previsao = []; v.atendimentoAte = null;
+      const origem = v.indo || v.no;
+      if (!v.indo && v.no === v.base) { this.chegouNaBase(v); return; }
+      const caminho = this.menorCaminho(origem, v.base);
+      if (caminho === null) { v.semRota = true; v.rota = []; v.proximaTentativa = this.t + 1; return; }
+      v.semRota = false;
+      let rota = [];
+      if (v.indo) rota.push({ no: v.indo, eixo: DIRS[this.direcaoEntre(v.no, v.indo)].eixo });
+      v.rota = rota.concat(this.montarRota(origem, caminho));
+    }
+    // "à Base do SAMU" / "ao Quartel dos Bombeiros"
+    nomeBase(v, prep) {
+      const base = this.bases.find(b => b.no === v.base);
+      const nome = base ? base.nome : 'base ' + v.base;
+      const masc = /^Quartel/.test(nome);
+      const formas = { a: masc ? 'ao' : 'à', por: masc ? 'pelo' : 'pela', para: masc ? 'para o' : 'para a' };
+      return `${formas[prep]} ${nome}`;
+    }
+    chegouNaBase(v) {
+      v.rota = []; v.destino = null; v.semRota = false; v.no = v.base; v.indo = null;
+      if (v.papel === 'RESERVA') {
+        v.modo = 'RESERVA';
+        this.registrar(['RN15'], `${v.id} chegou ${this.nomeBase(v, 'a')} e ficou de reserva.`);
+      } else {
+        this.voltarAPatrulha(v);
+        this.registrar(['RN15'], `${v.id} passou ${this.nomeBase(v, 'por')} e voltou a patrulhar.`);
+      }
+    }
+    terminarServico(v) {
+      if (v.papel === 'RESERVA') {
+        this.registrar(['RN15', 'UC05'], `${v.id} é de reserva: terminou o serviço e volta ${this.nomeBase(v, 'para')}, sem corredor verde.`);
+        this.iniciarRetorno(v);
+      } else {
+        this.voltarAPatrulha(v);
+        this.registrar(['RN15', 'UC05'], `${v.id} terminou o serviço e volta a patrulhar a partir de ${v.indo || v.no}.`);
+      }
+    }
+
+    // ---------- corredor verde (RN05, RN06) ----------
+    iniciarTrecho(v) {
+      const origem = v.indo || v.no;
+      const caminho = this.menorCaminho(origem, v.destino);
+      if (caminho === null) {
+        v.semRota = true; v.rota = []; v.proximaTentativa = this.t + 1;
+        const chave = `semrota:${v.id}:${v.destino}:${v.trecho}`;
+        if (!this.jaLogado.has(chave)) {
+          this.jaLogado.add(chave);
+          this.registrar(['RN13', 'RNF03', 'UC04'], `Sem caminho de ${origem} até ${v.destino}: semáforos em falha bloqueiam a passagem. ${v.id} foi avisada e aguarda.`, 'alerta');
+        }
+        return;
+      }
+      v.semRota = false;
+      let rota = [];
+      if (v.indo) rota.push({ no: v.indo, eixo: DIRS[this.direcaoEntre(v.no, v.indo)].eixo });
+      rota = rota.concat(this.montarRota(origem, caminho));
+      v.rota = rota;
+      if (!rota.length) { this.chegouAoDestino(v); return; }
+      const oc = v.ocorrencia;
+      for (const r of rota) {
+        const c = this.cruzamentos.get(r.no);
+        c.reservas.push({ viaturaId: v.id, ocorrenciaId: oc.id, eixo: r.eixo, criticidade: oc.criticidade, ordem: oc.ordem });
+      }
+      this.contar('RN05');
+      this.registrar(['RN06', 'UC04'], `Corredor verde aberto para ${v.id} (trecho ${v.trecho}, ${rota.length} cruzamento${rota.length > 1 ? 's' : ''}): ${rota.map(r => r.no).join(' → ')}.`);
+      for (const r of rota) {
+        const c = this.cruzamentos.get(r.no);
+        this.verificarConflito(c);
+        this.atualizarSemaforo(c);
+      }
+    }
+
+    // RN12
+    verificarConflito(c) {
+      if (c.reservas.length < 2) return;
+      const w = this.vencedor(c);
+      for (const r of c.reservas) {
+        if (r.eixo === w.eixo) continue;
+        const chave = `conflito:${c.id}:${w.ocorrenciaId}:${r.ocorrenciaId}`;
+        if (this.jaLogado.has(chave)) continue;
+        this.jaLogado.add(chave);
+        const motivo = w.criticidade < r.criticidade
+          ? `criticidade ${w.criticidade} vence ${r.criticidade}`
+          : `mesma criticidade (${w.criticidade}); ${w.ocorrenciaId} foi registrada primeiro`;
+        this.registrar(['RN12', 'UC08'], `Conflito em ${c.id}: ${w.viaturaId} (${NOME_EIXO[w.eixo]}) passa antes de ${r.viaturaId} (${NOME_EIXO[r.eixo]}), ${motivo}.`, 'alerta');
+      }
+    }
+
+    liberar(c, viaturaId) {
+      const antes = c.reservas.length;
+      c.reservas = c.reservas.filter(r => r.viaturaId !== viaturaId);
+      if (c.reservas.length === antes) return false;
+      if (!c.reservas.length) c.semaforo.desde = this.t;
+      this.atualizarSemaforo(c);
+      return true;
+    }
+    liberarTodas(v) {
+      const liberados = [];
+      for (const c of this.cruzamentos.values()) if (this.liberar(c, v.id)) liberados.push(c.id);
+      return liberados;
+    }
+
+    // ---------- posição da viatura (UC01, UC06, UC07) ----------
+    saida(viaturaId, de, para) {
+      const v = this.viaturas.get(viaturaId);
+      if (!v) throw new ErroApi(404, `Viatura ${viaturaId} não existe.`);
+      this.cruzamento(de); this.cruzamento(para);
+      if (!this.direcaoEntre(de, para)) throw new ErroApi(400, `${de} e ${para} não são vizinhos.`);
+      if (v.modo === 'ATENDIMENTO') throw new ErroApi(409, `${v.id} está em atendimento.`);
+      v.no = de; v.indo = para;
+      if (v.modo === 'RETORNO') {
+        if (v.semRota || (v.rota.length && v.rota[0].no !== para)) this.iniciarRetorno(v);
+        return v;
+      }
+      if (v.modo !== 'EMERGENCIA') return v;
+      if (v.semRota) { this.iniciarTrecho(v); return v; }
+      if (v.rota.length && v.rota[0].no !== para) {
+        const antes = v.rota.map(r => r.no);
+        this.registrar(['RN10', 'UC07'], `${v.id} saiu da rota em ${de} (foi para ${para}, a rota pedia ${antes[0]}). Recalculando o trecho.`, 'alerta');
+        this.liberarTodas(v);
+        this.iniciarTrecho(v);
+        const depois = new Set(v.rota.map(r => r.no));
+        const soltos = antes.filter(n => !depois.has(n));
+        if (soltos.length) this.registrar(['RN10', 'RN08'], `Saíram do trajeto e voltaram ao ciclo normal: ${soltos.join(', ')}.`);
+      }
+      return v;
+    }
+
+    chegada(viaturaId, no) {
+      const v = this.viaturas.get(viaturaId);
+      if (!v) throw new ErroApi(404, `Viatura ${viaturaId} não existe.`);
+      this.cruzamento(no);
+      v.no = no; v.indo = null;
+      this.jaLogado.delete(`espera:${v.id}:${no}`);
+      this.contar('UC01');
+      if (v.modo === 'RETORNO') {
+        if (v.rota.length && v.rota[0].no === no) v.rota.shift();
+        if (no === v.base) this.chegouNaBase(v);
+        else if (!v.rota.length || v.semRota) this.iniciarRetorno(v);
+        return v;
+      }
+      if (v.modo !== 'EMERGENCIA') return v;
+      if (v.rota.length && v.rota[0].no === no) {
+        v.rota.shift();
+        if (this.liberar(this.cruzamentos.get(no), v.id)) {
+          this.registrar(['RN08', 'UC06'], `${v.id} passou por ${no}: cruzamento liberado, volta ao ciclo normal.`);
+        }
+      } else if (no !== v.destino && !v.semRota) {
+        this.registrar(['RN10', 'UC07'], `${v.id} chegou a ${no}, fora da rota. Recalculando o trecho.`, 'alerta');
+        this.liberarTodas(v);
+        this.iniciarTrecho(v);
+      }
+      if (v.modo === 'EMERGENCIA' && no === v.destino && !v.rota.length) this.chegouAoDestino(v);
+      return v;
+    }
+
+    // ---------- atendimento e hospital (RN09, RN11) ----------
+    chegouAoDestino(v) {
+      const oc = v.ocorrencia;
+      this.liberarTodas(v);
+      v.rota = [];
+      if (v.trecho === 1) {
+        v.modo = 'ATENDIMENTO';
+        v.atendimentoAte = this.t + this.cfg.atendimentoSeg;
+        oc.status = 'EM_ATENDIMENTO';
+        this.registrar(['RN09', 'UC05'], `${v.id} chegou ao local de ${oc.id} (${oc.no}). Atendimento de ${this.cfg.atendimentoSeg} s.`);
+      } else {
+        oc.status = 'ENCERRADA';
+        oc.encerradaEm = this.t;
+        this.registrar(['RN09', 'UC05'], `${v.id} chegou ao ${oc.hospital.nome} (${oc.hospital.no}). ${oc.id} encerrada.`);
+        this.terminarServico(v);
+      }
+    }
+    voltarAPatrulha(v) {
+      v.modo = 'PATRULHA'; v.ocorrencia = null; v.trecho = 0; v.destino = null;
+      v.rota = []; v.previsao = []; v.semRota = false; v.atendimentoAte = null;
+    }
+    fimDoAtendimento(v) {
+      const oc = v.ocorrencia;
+      if (v.tipo !== 'AMBULANCIA') {
+        oc.status = 'ENCERRADA';
+        oc.encerradaEm = this.t;
+        this.registrar(['RN11', 'UC05'], `${v.id} encerrou ${oc.id} no local. Bombeiros não seguem ao hospital.`);
+        this.terminarServico(v);
+        return;
+      }
+      oc.hospital = this.hospitalMaisProximo(oc.no) || oc.hospital || this.hospitais[0];
+      oc.status = 'A_CAMINHO_HOSPITAL';
+      v.modo = 'EMERGENCIA'; v.trecho = 2; v.destino = oc.hospital.no; v.previsao = [];
+      this.registrar(['RN09', 'RN04', 'UC05'], `Atendimento de ${oc.id} concluído. ${v.id} segue ao ${oc.hospital.nome}, o hospital mais próximo.`);
+      this.iniciarTrecho(v);
+    }
+
+    // ---------- falhas (UC09, RN13) ----------
+    definirFalha(id, ativa) {
+      const c = this.cruzamento(id);
+      const s = c.semaforo;
+      if (!!ativa === s.falha) return c;
+      if (ativa) {
+        s.falha = true;
+        this.registrar(['RN13', 'UC09'], `Semáforo de ${id} em falha: amarelo piscante. Veículos param e seguem com cautela.`, 'alerta');
+        for (const v of this.viaturas.values()) {
+          if (v.modo === 'RETORNO' && v.rota.some(r => r.no === id && r.no !== v.base) && v.indo !== id) { this.iniciarRetorno(v); continue; }
+          if (v.modo !== 'EMERGENCIA') continue;
+          if (!v.rota.some(r => r.no === id && r.no !== v.destino)) continue;
+          if (v.indo === id) continue; // já está entrando nele
+          this.registrar(['RN13', 'RN05', 'UC09'], `A rota de ${v.id} passava por ${id}. Recalculando para desviar.`);
+          this.liberarTodas(v);
+          this.iniciarTrecho(v);
+        }
+      } else {
+        s.falha = false; s.eixo = 'NS'; s.estado = 'VERDE'; s.desde = this.t;
+        this.registrar(['RN13', 'UC09'], `Falha de ${id} desligada: o ciclo normal recomeça.`);
+        this.atualizarSemaforo(c);
+        for (const v of this.viaturas.values()) {
+          if (v.modo === 'EMERGENCIA' && v.semRota) this.iniciarTrecho(v);
+          if (v.modo === 'RETORNO' && v.semRota) this.iniciarRetorno(v);
+        }
+      }
+      return c;
+    }
+
+    // ---------- temporizador (UC02, UC05) ----------
+    tick(dt) {
+      this.relogio.avancar(dt);
+      for (const c of this.cruzamentos.values()) this.atualizarSemaforo(c);
+      for (const v of this.viaturas.values()) {
+        if (v.modo === 'ATENDIMENTO' && this.t >= v.atendimentoAte - 1e-9) this.fimDoAtendimento(v);
+        else if (v.modo === 'EMERGENCIA' && v.semRota && this.t >= v.proximaTentativa) this.iniciarTrecho(v);
+        else if (v.modo === 'RETORNO' && v.semRota && this.t >= v.proximaTentativa) this.iniciarRetorno(v);
+      }
+    }
+
+    // ---------- leituras para a maquete ----------
+    estadoSemaforos() {
+      return [...this.cruzamentos.values()].map(c => {
+        const w = this.vencedor(c);
+        return {
+          id: c.id, col: c.col, lin: c.lin, falha: c.semaforo.falha,
+          NS: this.luz(c.id, 'NS'), LO: this.luz(c.id, 'LO'),
+          reservas: c.reservas.map(r => ({ viaturaId: r.viaturaId, eixo: r.eixo })),
+          vencedor: w ? w.viaturaId : null
+        };
+      });
+    }
+    estadoViaturas() {
+      return [...this.viaturas.values()].map(v => ({
+        id: v.id, tipo: v.tipo, papel: v.papel, base: v.base, modo: v.modo, no: v.no, indo: v.indo, trecho: v.trecho,
+        destino: v.destino, semRota: v.semRota, rota: v.rota.map(r => ({ no: r.no, eixo: r.eixo })),
+        previsao: v.previsao.slice(), ocorrenciaId: v.ocorrencia ? v.ocorrencia.id : null,
+        atendimentoRestante: v.modo === 'ATENDIMENTO' ? Math.max(0, v.atendimentoAte - this.t) : 0,
+        hospital: v.ocorrencia && v.ocorrencia.hospital ? v.ocorrencia.hospital.nome : null
+      }));
+    }
+
+    // apoio para testes (equivale a montar o cenário no xUnit)
+    posicionar(viaturaId, no) {
+      const v = this.viaturas.get(viaturaId);
+      this.cruzamento(no);
+      v.no = no; v.indo = null;
+    }
+  }
+
+  /* ---------------- API (controllers do ASP.NET Core) ---------------- */
+  function criarApi(sis) {
+    const rotas = [
+      ['GET', /^\/api\/malha$/, () => ({
+        colunas: sis.cfg.colunas, linhas: sis.cfg.linhas, hospitais: sis.hospitais,
+        cruzamentos: [...sis.cruzamentos.values()].map(c => ({ id: c.id, col: c.col, lin: c.lin }))
+      })],
+      ['GET', /^\/api\/semaforos$/, () => sis.estadoSemaforos()],
+      ['GET', /^\/api\/viaturas$/, () => sis.estadoViaturas()],
+      ['GET', /^\/api\/ocorrencias$/, () => sis.ocorrencias.map(o => Object.assign({}, o, { hospital: o.hospital ? o.hospital.nome : null }))],
+      ['GET', /^\/api\/cruzamentos\/(C\d+)\/pode-atravessar$/, (m, b) => sis.podeAtravessar(m[1], b.eixo, b.viaturaId)],
+      ['GET', /^\/api\/log$/, () => sis.log.slice()],
+      ['POST', /^\/api\/ocorrencias$/, (m, b) => {
+        const oc = sis.registrarOcorrencia(b);
+        return Object.assign({}, oc, { hospital: oc.hospital ? oc.hospital.nome : null });
+      }, 201],
+      ['POST', /^\/api\/viaturas\/([A-Z]+-\d+)\/saida$/, (m, b) => { sis.saida(m[1], b.de, b.para); return { ok: true }; }],
+      ['POST', /^\/api\/viaturas\/([A-Z]+-\d+)\/chegada$/, (m, b) => { sis.chegada(m[1], b.cruzamento); return { ok: true }; }],
+      ['POST', /^\/api\/cruzamentos\/(C\d+)\/falha$/, (m, b) => { sis.definirFalha(m[1], !!b.ativa); return { ok: true }; }]
+    ];
+    const tagsApi = path =>
+      /saida|chegada/.test(path) ? ['API', 'UC01'] :
+      /ocorrencias/.test(path) ? ['API', 'UC03'] :
+      /falha/.test(path) ? ['API', 'UC09'] : ['API'];
+
+    return {
+      registrarChamadas: true,
+      request(metodo, caminho, corpo) {
+        corpo = corpo || {};
+        if (/^\/api\/log/.test(caminho) && metodo !== 'GET') {
+          // RNF05: o log não tem edição nem exclusão
+          if (this.registrarChamadas) sis.registrar(['API', 'RNF05'], `${metodo} ${caminho} → 405: o log de eventos não pode ser alterado.`, 'api');
+          else sis.contar('RNF05');
+          return { status: 405, corpo: { erro: 'O log de eventos é somente leitura.' } };
+        }
+        for (const [m, re, fn, ok] of rotas) {
+          if (m !== metodo) continue;
+          const achou = caminho.match(re);
+          if (!achou) continue;
+          try {
+            const r = fn(achou, corpo);
+            if (metodo === 'POST' && this.registrarChamadas) sis.registrar(tagsApi(caminho), `${metodo} ${caminho} ${JSON.stringify(corpo)} → ${ok || 200}`, 'api');
+            return { status: ok || 200, corpo: r };
+          } catch (e) {
+            if (!(e instanceof ErroApi)) throw e;
+            sis.registrar(['API', 'RNF04'], `${metodo} ${caminho} ${JSON.stringify(corpo)} → ${e.status}: ${e.message}`, 'erro');
+            return { status: e.status, corpo: { erro: e.message } };
+          }
+        }
+        return { status: 404, corpo: { erro: `Rota ${metodo} ${caminho} não existe.` } };
+      },
+      get(c, b) { return this.request('GET', c, b); },
+      post(c, b) { return this.request('POST', c, b); }
+    };
+  }
+
+  /* ---------------- motorista simulado (usado nos testes) ---------------- */
+  // Faz a viatura seguir a rota obedecendo os semáforos, como o piloto automático da maquete.
+  function criarMotorista(sis, viaturaId, segPorQuadra) {
+    const v = sis.viaturas.get(viaturaId);
+    const st = { para: null, falta: 0, cautela: 0 };
+    return function passo(dt) {
+      if ((v.modo !== 'EMERGENCIA' && v.modo !== 'RETORNO') || v.semRota) { st.para = null; return; }
+      if (!st.para) {
+        if (!v.rota.length) return;
+        st.para = v.rota[0].no; st.falta = segPorQuadra; st.cautela = 0;
+        sis.saida(v.id, v.no, st.para);
+        st.para = v.indo; // pode ter mudado
+        return;
+      }
+      if (st.falta > 0) { st.falta -= dt; return; }
+      const eixo = DIRS[sis.direcaoEntre(v.no, st.para)].eixo;
+      const r = sis.podeAtravessar(st.para, eixo, v.id);
+      if (!r.pode) return;
+      if (r.cautela && st.cautela < sis.cfg.cautelaSeg) { st.cautela += dt; return; }
+      const alvo = st.para; st.para = null;
+      sis.chegada(v.id, alvo);
+    };
+  }
+
+  /* ---------------- TESTES (viram métodos [Fact] no xUnit) ---------------- */
+  function rng(semente) {
+    let s = semente >>> 0;
+    return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  function afirmar(cond, msg) { if (!cond) throw new Error(msg); }
+  function avancar(sis, seg, passos) {
+    const dt = 0.1;
+    for (let i = 0; i < Math.round(seg / dt); i++) { sis.tick(dt); if (passos) passos.forEach(p => p(dt)); }
+  }
+  function sistemaDeTeste(cfg) {
+    const sis = new Sistema(cfg);
+    const api = criarApi(sis);
+    api.registrarChamadas = false;
+    return { sis, api };
+  }
+
+  let cacheSimulacao = null;
+  function simulacaoDeUmaHora() {
+    if (cacheSimulacao) return cacheSimulacao;
+    const { sis, api } = sistemaDeTeste();
+    const sorteio = rng(42);
+    const ids = [...sis.cruzamentos.keys()];
+    const motoristas = ['AMB-01', 'AMB-02', 'BOM-01', 'BOM-02'].map(id => criarMotorista(sis, id, 1.4));
+    const anterior = new Map();
+    const res = { verdeDuplo: 0, semAmarelo: 0, amareloCurto: 0, excecao: null, ocorrencias: 0, encerradas: 0, falhas: 0, desvios: 0, ticks: 0 };
+    const inicioAmarelo = new Map();
+    const dt = 0.1;
+    try {
+      for (let i = 0; i < 36000; i++) {
+        sis.tick(dt);
+        motoristas.forEach(m => m(dt));
+        res.ticks++;
+        if (i % 120 === 0) {
+          for (const tipo of ['AMBULANCIA', 'BOMBEIROS']) {
+            if (sorteio() < 0.8) {
+              const r = api.post('/api/ocorrencias', { tipo, cruzamento: ids[Math.floor(sorteio() * ids.length)], criticidade: 1 + Math.floor(sorteio() * 3) });
+              if (r.status === 201) res.ocorrencias++;
+            }
+          }
+        }
+        if (i % 450 === 0) {
+          const alvo = ids[Math.floor(sorteio() * ids.length)];
+          const c = sis.cruzamentos.get(alvo);
+          api.post(`/api/cruzamentos/${alvo}/falha`, { ativa: !c.semaforo.falha });
+          res.falhas++;
+        }
+        if (i % 900 === 450) {
+          const v = sis.viaturas.get('AMB-01');
+          if (v.modo === 'EMERGENCIA' && !v.indo && v.rota.length) {
+            const errado = ['N', 'L', 'S', 'O'].map(d => sis.vizinho(v.no, d)).find(n => n && n !== v.rota[0].no);
+            if (errado) { sis.saida('AMB-01', v.no, errado); res.desvios++; }
+          }
+        }
+        for (const c of sis.cruzamentos.values()) {
+          const ns = sis.luz(c.id, 'NS'), lo = sis.luz(c.id, 'LO');
+          if (ns === 'VERDE' && lo === 'VERDE') res.verdeDuplo++;
+          for (const [eixo, luz] of [['NS', ns], ['LO', lo]]) {
+            const k = c.id + eixo, ant = anterior.get(k);
+            if (luz === 'AMARELO' && ant !== 'AMARELO') inicioAmarelo.set(k, sis.t);
+            if (ant === 'VERDE' && luz === 'VERMELHO') res.semAmarelo++;
+            if (ant === 'AMARELO' && luz === 'VERMELHO' && sis.t - inicioAmarelo.get(k) < sis.cfg.amareloSeg - 1e-6) res.amareloCurto++;
+            anterior.set(k, luz);
+          }
+        }
+      }
+    } catch (e) { res.excecao = e.message; }
+    res.encerradas = sis.ocorrencias.filter(o => o.status === 'ENCERRADA').length;
+    cacheSimulacao = res;
+    return res;
+  }
+
+  const TESTES = [
+    {
+      nome: 'RN01_DuasDirecoesNuncaFicamVerdesJuntas', reqs: ['RN01', 'RNF01', 'UC02'],
+      rodar() {
+        const r = simulacaoDeUmaHora();
+        afirmar(!r.excecao, 'A simulação lançou exceção: ' + r.excecao);
+        afirmar(r.verdeDuplo === 0, `${r.verdeDuplo} instantes com verde nas duas direções.`);
+        return `0 verdes simultâneos em ${r.ticks.toLocaleString('pt-BR')} ticks × 20 cruzamentos, com ${r.ocorrencias} ocorrências, ${r.falhas} falhas e ${r.desvios} desvios.`;
+      }
+    },
+    {
+      nome: 'RN02_VerdeSoViraVermelhoDepoisDe2sDeAmarelo', reqs: ['RN02', 'RNF01'],
+      rodar() {
+        const r = simulacaoDeUmaHora();
+        afirmar(r.semAmarelo === 0, `${r.semAmarelo} trocas de verde direto para vermelho.`);
+        afirmar(r.amareloCurto === 0, `${r.amareloCurto} amarelos com menos de 2 s.`);
+        return 'Nenhuma troca pulou o amarelo e nenhum amarelo durou menos de 2 s em 1 hora simulada.';
+      }
+    },
+    {
+      nome: 'RN03_CicloNormalTem8sDeVerdeE2sDeAmarelo', reqs: ['RN03', 'UC02'],
+      rodar() {
+        const { sis } = sistemaDeTeste();
+        const s = sis.cruzamentos.get('C1').semaforo;
+        s.eixo = 'NS'; s.estado = 'VERDE'; s.desde = 0;
+        const trocas = [];
+        let ant = 'NS:VERDE';
+        for (let i = 0; i < 300; i++) {
+          sis.tick(0.1);
+          const atual = s.eixo + ':' + s.estado;
+          if (atual !== ant) { trocas.push([atual, +sis.t.toFixed(1)]); ant = atual; }
+        }
+        const esperado = [['NS:AMARELO', 8], ['LO:VERDE', 10], ['LO:AMARELO', 18]];
+        afirmar(trocas.length >= 3, 'O ciclo não trocou de fase.');
+        esperado.forEach((e, i) => afirmar(trocas[i][0] === e[0] && Math.abs(trocas[i][1] - e[1]) < 0.11, `Troca ${i + 1}: esperado ${e[0]} em ${e[1]} s, veio ${trocas[i][0]} em ${trocas[i][1]} s.`));
+        return 'C1: NS verde até 8 s, amarelo até 10 s, então LO verde até 18 s.';
+      }
+    },
+    {
+      nome: 'RN04_RotaTemDoisTrechosEVaiAoHospitalMaisProximo', reqs: ['RN04', 'UC03'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        const r = api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C14', criticidade: 2 });
+        afirmar(r.status === 201, 'Registro falhou: ' + JSON.stringify(r.corpo));
+        const v = sis.viaturas.get('AMB-01');
+        afirmar(v.rota[v.rota.length - 1].no === 'C14', 'O trecho 1 não termina no local da ocorrência.');
+        afirmar(r.corpo.hospital === 'Hospital Sul', `Esperado Hospital Sul (2 quarteirões de C14), veio ${r.corpo.hospital}.`);
+        afirmar(v.previsao[v.previsao.length - 1] === 'C18', 'O trecho 2 previsto não termina no hospital.');
+        return `Trecho 1: C11 → … → C14. Trecho 2 previsto: ${v.previsao.join(' → ')} (Hospital Sul).`;
+      }
+    },
+    {
+      nome: 'RN05_TrechoSegueOMenorCaminhoEmQuarteiroes', reqs: ['RN05'],
+      rodar() {
+        const { sis } = sistemaDeTeste();
+        const ids = [...sis.cruzamentos.keys()];
+        let n = 0;
+        for (const a of ids) for (const b of ids) {
+          const c = sis.menorCaminho(a, b);
+          const ca = sis.cruzamentos.get(a), cb = sis.cruzamentos.get(b);
+          const manhattan = Math.abs(ca.col - cb.col) + Math.abs(ca.lin - cb.lin);
+          afirmar(c.length === manhattan, `${a}→${b}: ${c.length} quarteirões, menor é ${manhattan}.`);
+          n++;
+        }
+        sis.definirFalha('C12', true);
+        const desvio = sis.menorCaminho('C11', 'C13');
+        afirmar(!desvio.includes('C12'), 'A rota passou por semáforo em falha.');
+        return `${n} pares de cruzamentos com o menor caminho; com C12 em falha, C11→C13 vira ${desvio.join(' → ')}.`;
+      }
+    },
+    {
+      nome: 'RN06_CorredorAbreTodosOsCruzamentosEmAte2s', reqs: ['RN06', 'UC04', 'RNF06'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C5', criticidade: 1 });
+        const rota = sis.viaturas.get('AMB-01').rota;
+        avancar(sis, 2.0);
+        const fechados = rota.filter(r => sis.luz(r.no, r.eixo) !== 'VERDE');
+        afirmar(!fechados.length, `Ainda não verdes após 2 s: ${fechados.map(r => r.no).join(', ')}.`);
+        return `Os ${rota.length} cruzamentos do trecho (${rota.map(r => r.no).join(' → ')}) estavam verdes em até 2 s.`;
+      }
+    },
+    {
+      nome: 'RN07_NinguemAtravessaComVermelhoOuAmarelo', reqs: ['RN07', 'UC01'],
+      rodar() {
+        const { sis } = sistemaDeTeste();
+        const s = sis.cruzamentos.get('C7').semaforo;
+        s.eixo = 'NS'; s.estado = 'VERDE';
+        afirmar(sis.podeAtravessar('C7', 'NS', 'AMB-01').pode, 'Bloqueou com verde.');
+        afirmar(!sis.podeAtravessar('C7', 'LO', 'AMB-01').pode, 'Liberou com vermelho.');
+        s.estado = 'AMARELO';
+        afirmar(!sis.podeAtravessar('C7', 'NS', 'AMB-01').pode, 'Liberou com amarelo.');
+        return 'Verde libera; vermelho e amarelo seguram a viatura na faixa.';
+      }
+    },
+    {
+      nome: 'RN08_CruzamentoVoltaAoCicloDepoisDaPassagem', reqs: ['RN08', 'UC06'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C15', criticidade: 1 });
+        avancar(sis, 2);
+        api.post('/api/viaturas/AMB-01/saida', { de: 'C11', para: 'C12' });
+        api.post('/api/viaturas/AMB-01/chegada', { cruzamento: 'C12' });
+        const c = sis.cruzamentos.get('C12');
+        afirmar(c.reservas.length === 0, 'C12 continua reservado depois da passagem.');
+        const antes = c.semaforo.eixo;
+        avancar(sis, sis.cfg.verdeSeg + sis.cfg.amareloSeg + 0.2);
+        afirmar(c.semaforo.eixo !== antes, 'C12 não voltou a alternar as fases.');
+        return 'C12 perdeu a reserva na passagem e alternou de fase após 10 s.';
+      }
+    },
+    {
+      nome: 'RN09_Atendimento4sDepoisHospitalEEncerra', reqs: ['RN09', 'UC05', 'RN06'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        const r = api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C9', criticidade: 1 });
+        const oc = sis.ocorrencias[0];
+        const motorista = criarMotorista(sis, 'AMB-01', 1.4);
+        let chegouEm = null, saiuEm = null;
+        for (let i = 0; i < 1200 && oc.status !== 'ENCERRADA'; i++) {
+          sis.tick(0.1); motorista(0.1);
+          if (oc.status === 'EM_ATENDIMENTO' && chegouEm === null) chegouEm = sis.t;
+          if (oc.status === 'A_CAMINHO_HOSPITAL' && saiuEm === null) saiuEm = sis.t;
+        }
+        afirmar(r.status === 201, 'Registro falhou.');
+        afirmar(chegouEm !== null, 'A ambulância não chegou ao local.');
+        afirmar(Math.abs(saiuEm - chegouEm - 4) < 0.15, `Atendimento durou ${(saiuEm - chegouEm).toFixed(1)} s.`);
+        afirmar(oc.status === 'ENCERRADA', 'A ocorrência não foi encerrada no hospital.');
+        afirmar(sis.viaturas.get('AMB-01').modo === 'PATRULHA', 'Depois do hospital a ambulância da patrulha não voltou a patrulhar.');
+        return `Chegou ao local em ${chegouEm.toFixed(1)} s, atendeu 4 s, encerrou no ${oc.hospital.nome} em ${oc.encerradaEm.toFixed(1)} s e voltou a patrulhar.`;
+      }
+    },
+    {
+      nome: 'RN10_DesvioRecalculaRotaELiberaCruzamentos', reqs: ['RN10', 'UC07'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C15', criticidade: 1 });
+        api.post('/api/viaturas/AMB-01/saida', { de: 'C11', para: 'C6' });
+        const v = sis.viaturas.get('AMB-01');
+        afirmar(v.rota[0].no === 'C6', 'A nova rota não começa no cruzamento para onde a viatura foi.');
+        afirmar(v.rota[v.rota.length - 1].no === 'C15', 'A nova rota não chega ao destino.');
+        const presos = ['C12', 'C13', 'C14'].filter(id => !v.rota.some(r => r.no === id) && sis.cruzamentos.get(id).reservas.length);
+        afirmar(!presos.length, `Continuam reservados: ${presos.join(', ')}.`);
+        return `Nova rota: ${v.rota.map(r => r.no).join(' → ')}. Cruzamentos fora do trajeto foram liberados.`;
+      }
+    },
+    {
+      nome: 'RN11_BombeirosNaoSeguemAoHospital', reqs: ['RN11', 'UC05'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        api.post('/api/ocorrencias', { tipo: 'BOMBEIROS', cruzamento: 'C19', criticidade: 2 });
+        const m = criarMotorista(sis, 'BOM-01', 1.4);
+        const oc = sis.ocorrencias[0];
+        for (let i = 0; i < 400 && oc.status !== 'ENCERRADA'; i++) { sis.tick(0.1); m(0.1); }
+        afirmar(oc.status === 'ENCERRADA', 'A ocorrência dos bombeiros não foi encerrada.');
+        afirmar(sis.viaturas.get('BOM-01').no === 'C19', 'Os bombeiros saíram do local.');
+        afirmar(!oc.hospital, 'Os bombeiros receberam hospital de destino.');
+        afirmar(sis.viaturas.get('BOM-01').modo === 'PATRULHA', 'Os bombeiros da patrulha não voltaram a patrulhar.');
+        return 'BOM-01 encerrou a ocorrência em C19, sem trecho até hospital, e voltou a patrulhar dali.';
+      }
+    },
+    {
+      nome: 'RN12_ConflitoPrioridadePorCriticidadeEOrdem', reqs: ['RN12', 'UC08'],
+      rodar() {
+        // AMB-01 vai de C11 a C15 (Leste-Oeste por C13); BOM-01 vai de C18 a C3 (Norte-Sul por C13)
+        let { sis, api } = sistemaDeTeste();
+        sis.posicionar('BOM-01', 'C18');
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C15', criticidade: 2 });
+        api.post('/api/ocorrencias', { tipo: 'BOMBEIROS', cruzamento: 'C3', criticidade: 1 });
+        avancar(sis, 2);
+        afirmar(sis.luz('C13', 'NS') === 'VERDE' && sis.luz('C13', 'LO') === 'VERMELHO', 'C13 não abriu para a criticidade 1.');
+        ({ sis, api } = sistemaDeTeste());
+        sis.posicionar('BOM-01', 'C18');
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C15', criticidade: 2 });
+        api.post('/api/ocorrencias', { tipo: 'BOMBEIROS', cruzamento: 'C3', criticidade: 2 });
+        avancar(sis, 2);
+        afirmar(sis.luz('C13', 'LO') === 'VERDE', 'Em empate, C13 não abriu para a ocorrência registrada primeiro.');
+        return 'Criticidade 1 venceu a 2 em C13; no empate, venceu a registrada primeiro.';
+      }
+    },
+    {
+      nome: 'RN13_FalhaFicaPiscanteERotaDesvia', reqs: ['RN13', 'UC09', 'RNF03'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C15', criticidade: 1 });
+        api.post('/api/cruzamentos/C13/falha', { ativa: true });
+        const v = sis.viaturas.get('AMB-01');
+        afirmar(sis.luz('C13', 'NS') === 'PISCANTE', 'C13 não ficou piscante.');
+        afirmar(!v.rota.some(r => r.no === 'C13'), 'A rota não desviou de C13.');
+        ['C10', 'C20', 'C14'].forEach(id => api.post(`/api/cruzamentos/${id}/falha`, { ativa: true }));
+        afirmar(v.semRota, 'Com C15 cercado, a viatura deveria ficar sem rota.');
+        avancar(sis, 5);
+        api.post('/api/cruzamentos/C14/falha', { ativa: false });
+        afirmar(!v.semRota && v.rota.length, 'Ao desligar a falha, a rota não voltou.');
+        return 'C13 piscante e evitado; com C15 cercado a viatura aguardou sem erro e retomou quando C14 voltou.';
+      }
+    },
+    {
+      nome: 'RN14_EventosImportantesVaoParaOLog', reqs: ['RN14', 'UC10'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        sis.posicionar('BOM-01', 'C18');
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C15', criticidade: 2 });
+        api.post('/api/ocorrencias', { tipo: 'BOMBEIROS', cruzamento: 'C3', criticidade: 1 });
+        api.post('/api/viaturas/AMB-01/saida', { de: 'C11', para: 'C6' });
+        api.post('/api/cruzamentos/C20/falha', { ativa: true });
+        const tem = tag => sis.log.some(e => e.tags.includes(tag));
+        const faltam = ['UC03', 'RN06', 'RN10', 'RN12', 'RN13'].filter(t => !tem(t));
+        afirmar(!faltam.length, 'Sem registro no log: ' + faltam.join(', '));
+        return `${sis.log.length} eventos: ocorrência, corredor, desvio, conflito e falha registrados.`;
+      }
+    },
+    {
+      nome: 'RN15_VaiAViaturaMaisPertoPatrulhaContinuaReservaVoltaParaBase', reqs: ['RN15', 'UC03', 'UC05'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        sis.posicionar('AMB-01', 'C5');
+        sis.posicionar('BOM-01', 'C1');
+        const a = api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C16', criticidade: 2 });
+        afirmar(a.corpo.viaturaId === 'AMB-02', `C16 fica a 1 quarteirão da Base do SAMU: esperado AMB-02, veio ${a.corpo.viaturaId}.`);
+        const b = api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C4', criticidade: 2 });
+        afirmar(b.corpo.viaturaId === 'AMB-01', 'C4 fica perto da AMB-01 (patrulha), mas ela não foi.');
+        const c = api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C1', criticidade: 2 });
+        afirmar(c.status === 409, 'Sem ambulância livre, o pedido foi aceito.');
+        const d = api.post('/api/ocorrencias', { tipo: 'BOMBEIROS', cruzamento: 'C2', criticidade: 2 });
+        afirmar(d.corpo.viaturaId === 'BOM-01', 'C2 fica perto dos bombeiros da patrulha (C1), mas eles não foram.');
+        const e = api.post('/api/ocorrencias', { tipo: 'BOMBEIROS', cruzamento: 'C19', criticidade: 2 });
+        afirmar(e.corpo.viaturaId === 'BOM-02', 'C19 fica perto do quartel, mas a reserva não saiu.');
+        const ids = ['AMB-01', 'AMB-02', 'BOM-01', 'BOM-02'];
+        const ms = ids.map(id => criarMotorista(sis, id, 1.4));
+        const v = Object.fromEntries(ids.map(id => [id, sis.viaturas.get(id)]));
+        let corredorNaVolta = false;
+        for (let i = 0; i < 4000; i++) {
+          sis.tick(0.1); ms.forEach(m => m(0.1));
+          for (const x of Object.values(v)) if (x.modo === 'RETORNO' && [...sis.cruzamentos.values()].some(c => c.reservas.some(r => r.viaturaId === x.id))) corredorNaVolta = true;
+          if (v['AMB-02'].modo === 'RESERVA' && v['BOM-02'].modo === 'RESERVA' && v['AMB-01'].modo === 'PATRULHA' && v['BOM-01'].modo === 'PATRULHA') break;
+        }
+        afirmar(v['AMB-01'].modo === 'PATRULHA' && v['AMB-01'].no !== 'C11', 'A AMB-01 deveria voltar a patrulhar de onde terminou, sem ir à base.');
+        afirmar(v['BOM-01'].modo === 'PATRULHA' && v['BOM-01'].no === 'C2', 'O BOM-01 deveria voltar a patrulhar a partir de C2.');
+        afirmar(v['AMB-02'].modo === 'RESERVA' && v['AMB-02'].no === 'C11', 'A AMB-02 não voltou à Base do SAMU.');
+        afirmar(v['BOM-02'].modo === 'RESERVA' && v['BOM-02'].no === 'C20', 'A BOM-02 não voltou ao quartel.');
+        afirmar(!corredorNaVolta, 'A volta para a base abriu corredor verde.');
+        return `Patrulha mais perto atendeu C4 e C2 e voltou a patrulhar (AMB-01 em ${v['AMB-01'].no}, BOM-01 em C2); reservas atenderam C16 e C19 e voltaram às bases; sem ambulância livre → 409.`;
+      }
+    },
+    {
+      nome: 'RNF02_SimulacaoDe1HoraSemErro', reqs: ['RNF02', 'RNF01'],
+      rodar() {
+        const r = simulacaoDeUmaHora();
+        afirmar(!r.excecao, 'Exceção: ' + r.excecao);
+        afirmar(r.encerradas > 0, 'Nenhuma ocorrência chegou ao fim.');
+        return `3.600 s simulados: ${r.ocorrencias} ocorrências (${r.encerradas} encerradas), ${r.falhas} trocas de falha, ${r.desvios} desvios, sem exceção.`;
+      }
+    },
+    {
+      nome: 'RNF04_ApiRecusaDadosInvalidos', reqs: ['RNF04', 'UC03'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        const casos = [
+          [{ tipo: 'AMBULANCIA', cruzamento: 'C99', criticidade: 1 }, 400],
+          [{ tipo: 'AMBULANCIA', cruzamento: 'C5', criticidade: 7 }, 400],
+          [{ tipo: 'HELICOPTERO', cruzamento: 'C5', criticidade: 1 }, 400]
+        ];
+        for (const [corpo, esperado] of casos) {
+          const r = api.post('/api/ocorrencias', corpo);
+          afirmar(r.status === esperado, `${JSON.stringify(corpo)}: esperado ${esperado}, veio ${r.status}.`);
+        }
+        afirmar(sis.ocorrencias.length === 0, 'Pedido inválido criou ocorrência.');
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C5', criticidade: 1 });
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C6', criticidade: 1 });
+        const ocupada = api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C7', criticidade: 1 });
+        afirmar(ocupada.status === 409, 'Com as duas ambulâncias ocupadas, o terceiro pedido foi aceito.');
+        const pulo = api.post('/api/viaturas/AMB-01/saida', { de: 'C11', para: 'C20' });
+        afirmar(pulo.status === 400, 'Aceitou saída para cruzamento que não é vizinho.');
+        afirmar(sis.ocorrencias.length === 2, 'O estado mudou com dados inválidos.');
+        return 'Cruzamento inexistente, criticidade 7 e tipo HELICOPTERO → 400; sem ambulância livre → 409; salto entre cruzamentos → 400.';
+      }
+    },
+    {
+      nome: 'RNF05_LogNaoPodeSerAlteradoNemApagado', reqs: ['RNF05'],
+      rodar() {
+        const { sis, api } = sistemaDeTeste();
+        api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C5', criticidade: 1 });
+        const n = sis.log.length;
+        const put = api.request('PUT', '/api/log/1', { mensagem: 'x' });
+        const del = api.request('DELETE', '/api/log/1');
+        afirmar(put.status === 405 && del.status === 405, `PUT ${put.status}, DELETE ${del.status}.`);
+        afirmar(sis.log.length === n && sis.log[0].mensagem !== 'x', 'O log mudou.');
+        return 'PUT e DELETE em /api/log → 405; o log ficou igual.';
+      }
+    },
+    {
+      nome: 'RNF07_RotaCalculadaEmAte50ms', reqs: ['RNF07', 'RN05'],
+      rodar() {
+        const { sis } = sistemaDeTeste();
+        const agora = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+        let pior = 0;
+        for (let i = 0; i < 400; i++) {
+          const t0 = agora();
+          sis.menorCaminho('C1', 'C20');
+          pior = Math.max(pior, agora() - t0);
+        }
+        afirmar(pior <= 50, `Pior caso ${pior.toFixed(2)} ms.`);
+        return `400 cálculos de C1 a C20; pior caso ${pior.toFixed(2)} ms.`;
+      }
+    },
+    {
+      nome: 'RNF12_TemposVemDaConfiguracao', reqs: ['RNF12', 'RN03'],
+      rodar() {
+        const { sis } = sistemaDeTeste({ verdeSeg: 5, amareloSeg: 1 });
+        const s = sis.cruzamentos.get('C1').semaforo;
+        s.eixo = 'NS'; s.estado = 'VERDE'; s.desde = 0;
+        avancar(sis, 5.0);
+        afirmar(s.estado === 'AMARELO', 'Com verdeSeg = 5 o amarelo não começou em 5 s.');
+        avancar(sis, 1.0);
+        afirmar(s.eixo === 'LO' && s.estado === 'VERDE', 'Com amareloSeg = 1 a troca não ocorreu em 1 s.');
+        return 'Com verdeSeg = 5 e amareloSeg = 1, o ciclo seguiu os novos tempos sem mudar código.';
+      }
+    }
+  ];
+
+  function rodarTestes() {
+    cacheSimulacao = null;
+    const agora = () => (typeof performance !== 'undefined' ? performance.now() : Date.now());
+    return TESTES.map(t => {
+      const t0 = agora();
+      try {
+        const detalhe = t.rodar();
+        return { nome: t.nome, reqs: t.reqs, ok: true, detalhe, ms: agora() - t0 };
+      } catch (e) {
+        return { nome: t.nome, reqs: t.reqs, ok: false, detalhe: e.message, ms: agora() - t0 };
+      }
+    });
+  }
+
+  raiz.Logica = { Sistema, criarApi, rodarTestes, DIRS, OPOSTO, NOME_EIXO, ErroApi };
+})(typeof window !== 'undefined' ? window : globalThis);
+
+</script>
+<script>
+/* =====================================================================
+   CAMADA "FRONTEND" — na versão final é o React. Ela só desenha, lê o
+   estado pela API e manda as ações do usuário para a API.
+   ===================================================================== */
+(function () {
+  const L = window.Logica;
+  const R = window.REQS;
+  const W = 750, H = 600, B = 150, M = 75, RW = 36, FAIXA = 9, PARE = RW / 2 + 9;
+  const VEL_VIATURA = 118;
+  const reduzMov = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  const $ = id => document.getElementById(id);
+  const canvas = $('mapa'), ctx = canvas.getContext('2d');
+  let sis, api, veiculos, civis, estado, testesRes = null;
+  let pausado = false, velocidade = 1, modoClique = null, hoverNo = null, escala = 1;
+  let camadaFixa = null, cores = {};
+  let filtroTexto = '', mostrarApi = false, ultimoLogDesenhado = -1, abaAtiva = 'Log';
+
+  // ---------- utilidades ----------
+  const posNo = id => { const c = sis.cruzamentos.get(id); return { x: M + c.col * B, y: M + c.lin * B }; };
+  const fmtT = t => { const s = Math.max(0, Math.floor(t)); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+  const ANG = { L: 0, S: Math.PI / 2, O: Math.PI, N: -Math.PI / 2 };
+  function lerpAng(a, b, k) { let d = b - a; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI; return a + d * k; }
+  function lerCores() {
+    const cs = getComputedStyle(document.documentElement);
+    for (const k of ['sig-verde', 'sig-amarelo', 'sig-vermelho', 'rota-amb', 'rota-bom', 'ocorrencia', 'map-chao', 'map-calcada', 'map-predio', 'map-predio-2', 'map-parque', 'map-arvore', 'map-asfalto', 'map-cruz', 'map-faixa', 'map-texto', 'map-especial', 'accent', 'fg', 'bg', 'surface'])
+      cores[k] = cs.getPropertyValue('--' + k).trim();
+  }
+  let toastTimer = null;
+  function toast(msg) {
+    const el = $('toast'); el.textContent = msg; el.hidden = false;
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => { el.hidden = true; }, 4200);
+  }
+
+  // ---------- veículos da maquete ----------
+  function viaturaApi(id) { return api.get('/api/viaturas').corpo.find(v => v.id === id); }
+
+  class VeiculoFront {
+    constructor(id, tipo, no, dir) {
+      this.id = id; this.tipo = tipo; this.no = no; this.para = null; this.t = 0;
+      this.dir = dir; this.ang = ANG[dir]; this.desejada = null; this.andando = false;
+      this.liberado = false; this.cautela = 0; this.esperando = false; this.reserva = false;
+    }
+    eixo() { return L.DIRS[this.dir].eixo; }
+    centro() {
+      const a = posNo(this.no);
+      if (!this.para) return a;
+      const b = posNo(this.para);
+      return { x: a.x + (b.x - a.x) * this.t, y: a.y + (b.y - a.y) * this.t };
+    }
+    xy() {
+      if (this.reserva) return vagaBase(this.no);
+      const c = this.centro(), d = L.DIRS[this.dir];
+      return { x: c.x - d.dy * FAIXA, y: c.y + d.dx * FAIXA };
+    }
+    faixa() {
+      const c = this.centro(), d = L.DIRS[this.dir];
+      if (d.dy === 0) return { eixo: 'H', linha: sis.cruzamentos.get(this.no).lin, sentido: d.dx, s: c.x };
+      return { eixo: 'V', linha: sis.cruzamentos.get(this.no).col, sentido: d.dy, s: c.y };
+    }
+    partir(d) {
+      const n = sis.vizinho(this.no, d);
+      if (!n) return false;
+      const r = api.post(`/api/viaturas/${this.id}/saida`, { de: this.no, para: n });
+      if (r.status !== 200) return false;
+      this.para = n; this.dir = d; this.t = 0; this.liberado = false; this.cautela = 0;
+      return true;
+    }
+    inverter() {
+      [this.no, this.para] = [this.para, this.no];
+      this.t = 1 - this.t; this.dir = L.OPOSTO[this.dir]; this.liberado = this.t > 1 - PARE / B; this.cautela = 0;
+      api.post(`/api/viaturas/${this.id}/saida`, { de: this.no, para: this.para });
+    }
+    decidirManual() {
+      const d = this.desejada;
+      if (d === 'PARAR') { this.andando = false; return null; }
+      if (d && sis.vizinho(this.no, d)) { this.andando = true; return d; }
+      if (this.andando && sis.vizinho(this.no, this.dir)) return this.dir;
+      this.andando = false; return null;
+    }
+    // patrulha: em cada cruzamento escolhe uma rua ao acaso, sem dar meia-volta
+    passear() {
+      const opc = ['N', 'L', 'S', 'O'].filter(d => sis.vizinho(this.no, d) && d !== L.OPOSTO[this.dir]);
+      if (!opc.length) return L.OPOSTO[this.dir];
+      if (opc.includes(this.dir) && Math.random() < 0.5) return this.dir;
+      return opc[Math.floor(Math.random() * opc.length)];
+    }
+    atualizar(dt) {
+      const vb = viaturaApi(this.id);
+      if (vb.modo === 'RESERVA') { this.reserva = true; this.no = vb.no; this.para = null; this.t = 0; this.ang = 0; this.esperando = false; return; }
+      if (this.reserva) { this.reserva = false; this.no = vb.no; this.para = null; this.t = 0; }
+      this.ang = lerpAng(this.ang, ANG[this.dir], Math.min(1, dt * 12));
+      if (vb.modo === 'ATENDIMENTO') return;
+      const manual = this.id === 'AMB-01' && $('chkManual').checked;
+      if (!this.para) {
+        let d = null;
+        if (manual) d = this.decidirManual();
+        else if (vb.modo === 'EMERGENCIA' || vb.modo === 'RETORNO') {
+          if (vb.rota.length && !vb.semRota) d = sis.direcaoEntre(this.no, vb.rota[0].no);
+        } else d = this.passear();
+        if (!d || !this.partir(d)) return;
+      } else if (manual && this.desejada && this.desejada === L.OPOSTO[this.dir]) {
+        this.inverter();
+      }
+      let novo = this.t + VEL_VIATURA * dt / B;
+      const tPare = 1 - PARE / B;
+      if (!this.liberado && this.t <= tPare + 1e-6 && novo >= tPare) {
+        const r = api.get(`/api/cruzamentos/${this.para}/pode-atravessar`, { eixo: this.eixo(), viaturaId: this.id }).corpo;
+        if (!r.pode) { novo = tPare; this.esperando = true; }
+        else if (r.cautela && this.cautela < sis.cfg.cautelaSeg) { this.cautela += dt; novo = tPare; this.esperando = true; }
+        else { this.liberado = true; this.esperando = false; }
+      }
+      if (vb.modo === 'PATRULHA' || vb.modo === 'RETORNO') {
+        // fora da emergência a viatura fica atrás dos carros comuns
+        const f = this.faixa();
+        for (const c of civis) {
+          if (c.eixo !== f.eixo || c.linha !== f.linha || c.sentido !== f.sentido) continue;
+          const gap = (c.s - f.s) * f.sentido;
+          if (gap > 0 && gap < 26) { novo = this.t; break; }
+        }
+      }
+      this.t = Math.min(1, novo);
+      if (this.t >= 1) {
+        const alvo = this.para;
+        this.no = alvo; this.para = null; this.t = 0; this.liberado = false; this.cautela = 0; this.esperando = false;
+        api.post(`/api/viaturas/${this.id}/chegada`, { cruzamento: alvo });
+      }
+    }
+  }
+
+  // carros comuns: só animação da maquete, mas obedecem os semáforos (RN07)
+  class Civil {
+    constructor(eixo, linha, sentido, s, cor, vel) {
+      this.eixo = eixo; this.linha = linha; this.sentido = sentido; this.s = s; this.cor = cor; this.vel = vel;
+      this.liberadoNo = null; this.cautela = 0; this.desvio = 0;
+    }
+    nos() {
+      const out = [];
+      if (this.eixo === 'H') for (let c = 0; c < sis.cfg.colunas; c++) out.push({ p: M + c * B, id: sis.idDe(c, this.linha), ex: 'LO' });
+      else for (let l = 0; l < sis.cfg.linhas; l++) out.push({ p: M + l * B, id: sis.idDe(this.linha, l), ex: 'NS' });
+      return out;
+    }
+    xy() {
+      const lado = FAIXA + this.desvio;
+      if (this.eixo === 'H') return { x: this.s, y: M + this.linha * B + (this.sentido > 0 ? lado : -lado) };
+      return { x: M + this.linha * B + (this.sentido > 0 ? -lado : lado), y: this.s };
+    }
+    atualizar(dt) {
+      const limite = this.eixo === 'H' ? W : H;
+      let novo = this.s + this.sentido * this.vel * dt;
+      for (const n of this.nos()) {
+        const dAgora = (n.p - this.s) * this.sentido, dDepois = (n.p - novo) * this.sentido;
+        if (dAgora >= PARE - 0.5 && dDepois < PARE && this.liberadoNo !== n.id) {
+          const sem = estado.sem.get(n.id);
+          const luz = sem ? sem[n.ex] : 'VERMELHO';
+          let pode = luz === 'VERDE';
+          if (luz === 'PISCANTE') { this.cautela += dt; pode = this.cautela >= sis.cfg.cautelaSeg; }
+          if (pode) { this.liberadoNo = n.id; this.cautela = 0; }
+          else novo = n.p - this.sentido * PARE;
+        }
+      }
+      // distância do carro da frente (inclui viaturas)
+      const frente = [];
+      for (const c of civis) if (c !== this && c.eixo === this.eixo && c.linha === this.linha && c.sentido === this.sentido) frente.push(c.s);
+      for (const v of veiculos) { const f = v.faixa(); if (f.eixo === this.eixo && f.linha === this.linha && f.sentido === this.sentido && (v.para || v.esperando)) frente.push(f.s); }
+      for (const s of frente) {
+        const gap = (s - this.s) * this.sentido;
+        if (gap > 0 && (s - novo) * this.sentido < 22) novo = s - this.sentido * 22;
+      }
+      if ((novo - this.s) * this.sentido < 0) novo = this.s;
+      this.s = novo;
+      // encosta para a viatura em emergência que vem atrás
+      let encosta = 0;
+      for (const v of veiculos) {
+        const vb = estado.viat.get(v.id);
+        if (!vb || vb.modo !== 'EMERGENCIA') continue;
+        const f = v.faixa();
+        if (f.eixo === this.eixo && f.linha === this.linha && f.sentido === this.sentido) {
+          const atras = (this.s - f.s) * this.sentido;
+          if (atras > 0 && atras < 95) encosta = 6;
+        }
+      }
+      this.desvio += (encosta - this.desvio) * Math.min(1, dt * 6);
+      if (this.sentido > 0 && this.s > limite + 20) { this.s = -20; this.liberadoNo = null; }
+      if (this.sentido < 0 && this.s < -20) { this.s = limite + 20; this.liberadoNo = null; }
+    }
+  }
+
+  function criarCivis() {
+    const cs = ['#8796a1', '#c3ab72', '#6c8cae', '#ad7767', '#79977a', '#a3a3a3', '#cfd3d7', '#56636e', '#9a86ad'];
+    const lista = [];
+    let semente = 7;
+    const rnd = () => { semente = (semente * 16807) % 2147483647; return semente / 2147483647; };
+    const linhasH = sis.cfg.linhas, linhasV = sis.cfg.colunas;
+    for (let i = 0; i < 6; i++) {
+      const horizontal = i % 2 === 0;
+      const linha = Math.floor(rnd() * (horizontal ? linhasH : linhasV));
+      const sentido = rnd() < 0.5 ? 1 : -1;
+      const lim = horizontal ? W : H;
+      let s = 30 + rnd() * (lim - 60);
+      const vizinhos = lista.filter(c => c.eixo === (horizontal ? 'H' : 'V') && c.linha === linha && c.sentido === sentido);
+      if (vizinhos.some(c => Math.abs(c.s - s) < 40)) s = (s + 70) % lim;
+      lista.push(new Civil(horizontal ? 'H' : 'V', linha, sentido, s, cs[i % cs.length], 52 + rnd() * 26));
+    }
+    return lista;
+  }
+
+  // ---------- estado vindo da API (o React faria polling assim) ----------
+  function consultar() {
+    estado.sem = new Map(api.get('/api/semaforos').corpo.map(s => [s.id, s]));
+    estado.viat = new Map(api.get('/api/viaturas').corpo.map(v => [v.id, v]));
+    estado.oc = api.get('/api/ocorrencias').corpo;
+  }
+
+  // ---------- desenho ----------
+  function quadras() {
+    const xs = [0], ys = [0];
+    for (let c = 0; c < sis.cfg.colunas; c++) xs.push(M + c * B);
+    xs.push(W);
+    for (let l = 0; l < sis.cfg.linhas; l++) ys.push(M + l * B);
+    ys.push(H);
+    const out = [];
+    for (let i = 0; i < xs.length - 1; i++) for (let j = 0; j < ys.length - 1; j++) {
+      const x0 = i === 0 ? 0 : xs[i] + RW / 2, x1 = i === xs.length - 2 ? W : xs[i + 1] - RW / 2;
+      const y0 = j === 0 ? 0 : ys[j] + RW / 2, y1 = j === ys.length - 2 ? H : ys[j + 1] - RW / 2;
+      out.push({ i, j, x: x0, y: y0, w: x1 - x0, h: y1 - y0 });
+    }
+    return out;
+  }
+  const ESPECIAIS = {
+    '3,1': { tipo: 'hosp', nome: 'HOSPITAL NORTE' },
+    '2,3': { tipo: 'hosp', nome: 'HOSPITAL SUL' },
+    '1,2': { tipo: 'base', nome: 'BASE SAMU' },
+    '4,3': { tipo: 'quartel', nome: 'BOMBEIROS' }
+  };
+  function montarCamadaFixa() {
+    const dpr = window.devicePixelRatio || 1;
+    const cv = document.createElement('canvas');
+    cv.width = Math.round(W * escala * dpr); cv.height = Math.round(H * escala * dpr);
+    const g = cv.getContext('2d');
+    g.setTransform(escala * dpr, 0, 0, escala * dpr, 0, 0);
+    g.fillStyle = cores['map-chao']; g.fillRect(0, 0, W, H);
+    let semente = 3;
+    const rnd = () => { semente = (semente * 16807) % 2147483647; return semente / 2147483647; };
+    for (const q of quadras()) {
+      g.fillStyle = cores['map-calcada'];
+      g.beginPath(); g.roundRect(q.x + 2, q.y + 2, q.w - 4, q.h - 4, 6); g.fill();
+      const esp = ESPECIAIS[q.i + ',' + q.j];
+      const ix = q.x + 9, iy = q.y + 9, iw = q.w - 18, ih = q.h - 18;
+      if (iw < 10 || ih < 10) continue;
+      if (esp) {
+        g.fillStyle = cores['map-especial'];
+        g.beginPath(); g.roundRect(ix, iy, iw, ih, 4); g.fill();
+        g.strokeStyle = esp.tipo === 'hosp' ? cores['ocorrencia'] : esp.tipo === 'quartel' ? cores['rota-bom'] : cores['rota-amb'];
+        g.lineWidth = 2; g.stroke();
+        const cx = ix + iw / 2, cy = iy + ih / 2 - 8;
+        if (esp.tipo === 'hosp') {
+          g.fillStyle = cores['ocorrencia'];
+          g.fillRect(cx - 5, cy - 15, 10, 30); g.fillRect(cx - 15, cy - 5, 30, 10);
+        } else {
+          g.fillStyle = g.strokeStyle;
+          g.beginPath(); g.arc(cx, cy, 13, 0, Math.PI * 2); g.fill();
+          g.fillStyle = cores['map-especial']; g.font = '700 12px ' + getComputedStyle(document.body).getPropertyValue('--f-display');
+          g.textAlign = 'center'; g.textBaseline = 'middle';
+          g.fillText(esp.tipo === 'quartel' ? 'B' : 'S', cx, cy + 1);
+        }
+        g.fillStyle = cores['map-texto']; g.textAlign = 'center'; g.textBaseline = 'middle';
+        g.font = '700 11px "Barlow Semi Condensed", "Arial Narrow", sans-serif';
+        g.fillText(esp.nome, cx, iy + ih - 14);
+        continue;
+      }
+      if (rnd() < 0.22) {
+        g.fillStyle = cores['map-parque']; g.beginPath(); g.roundRect(ix, iy, iw, ih, 4); g.fill();
+        g.fillStyle = cores['map-arvore'];
+        const n = Math.max(2, Math.floor(iw * ih / 1800));
+        for (let k = 0; k < n; k++) { g.beginPath(); g.arc(ix + 8 + rnd() * (iw - 16), iy + 8 + rnd() * (ih - 16), 5 + rnd() * 5, 0, Math.PI * 2); g.fill(); }
+        continue;
+      }
+      // prédios
+      const cols = iw > 70 ? 2 : 1, lins = ih > 70 ? 2 : 1;
+      const gw = (iw - (cols - 1) * 6) / cols, gh = (ih - (lins - 1) * 6) / lins;
+      for (let a = 0; a < cols; a++) for (let b = 0; b < lins; b++) {
+        if (rnd() < 0.12) continue;
+        g.fillStyle = rnd() < 0.5 ? cores['map-predio'] : cores['map-predio-2'];
+        const enc = rnd() * 6;
+        g.beginPath(); g.roundRect(ix + a * (gw + 6) + enc / 2, iy + b * (gh + 6) + enc / 2, gw - enc, gh - enc, 3); g.fill();
+      }
+    }
+    // ruas
+    g.fillStyle = cores['map-asfalto'];
+    for (let l = 0; l < sis.cfg.linhas; l++) g.fillRect(0, M + l * B - RW / 2, W, RW);
+    for (let c = 0; c < sis.cfg.colunas; c++) g.fillRect(M + c * B - RW / 2, 0, RW, H);
+    // faixa central tracejada
+    g.strokeStyle = cores['map-faixa']; g.lineWidth = 1.4; g.setLineDash([9, 9]); g.globalAlpha = 0.65;
+    for (let l = 0; l < sis.cfg.linhas; l++) {
+      const y = M + l * B;
+      for (let c = -1; c < sis.cfg.colunas; c++) {
+        const x0 = c < 0 ? 0 : M + c * B + RW / 2 + 16, x1 = c === sis.cfg.colunas - 1 ? W : M + (c + 1) * B - RW / 2 - 16;
+        g.beginPath(); g.moveTo(x0, y); g.lineTo(x1, y); g.stroke();
+      }
+    }
+    for (let c = 0; c < sis.cfg.colunas; c++) {
+      const x = M + c * B;
+      for (let l = -1; l < sis.cfg.linhas; l++) {
+        const y0 = l < 0 ? 0 : M + l * B + RW / 2 + 16, y1 = l === sis.cfg.linhas - 1 ? H : M + (l + 1) * B - RW / 2 - 16;
+        g.beginPath(); g.moveTo(x, y0); g.lineTo(x, y1); g.stroke();
+      }
+    }
+    g.setLineDash([]); g.globalAlpha = 1;
+    // cruzamentos, faixas de pedestre e IDs
+    for (const c of sis.cruzamentos.values()) {
+      const x = M + c.col * B, y = M + c.lin * B;
+      g.fillStyle = cores['map-cruz']; g.fillRect(x - RW / 2, y - RW / 2, RW, RW);
+      g.fillStyle = cores['map-faixa']; g.globalAlpha = 0.55;
+      for (let k = -RW / 2 + 3; k < RW / 2 - 2; k += 6) {
+        g.fillRect(x + k, y - RW / 2 - 15, 3, 8); g.fillRect(x + k, y + RW / 2 + 7, 3, 8);
+        g.fillRect(x - RW / 2 - 15, y + k, 8, 3); g.fillRect(x + RW / 2 + 7, y + k, 8, 3);
+      }
+      g.globalAlpha = 1;
+      g.fillStyle = cores['map-texto']; g.font = '600 10px "JetBrains Mono", ui-monospace, monospace';
+      g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+      g.fillText(c.id, x + RW / 2 + 4, y - RW / 2 - 4);
+    }
+    camadaFixa = cv;
+  }
+
+  const QUADRA_BASE = { C11: '1,2', C20: '4,3' };
+  function vagaBase(no) {
+    const q = quadras().find(b => b.i + ',' + b.j === QUADRA_BASE[no]);
+    if (!q) return posNo(no);
+    const iy = q.y + 9, ih = q.h - 18;
+    return { x: q.x + q.w / 2 - 33, y: iy + ih / 2 - 8 };
+  }
+  function corViatura(id) { return id.startsWith('BOM') ? cores['rota-bom'] : cores['rota-amb']; }
+  function corLuz(l, t) {
+    if (l === 'VERDE') return cores['sig-verde'];
+    if (l === 'AMARELO') return cores['sig-amarelo'];
+    if (l === 'PISCANTE') return (Math.floor(t * 2.2) % 2 === 0 || reduzMov) ? cores['sig-amarelo'] : cores['map-asfalto'];
+    return cores['sig-vermelho'];
+  }
+
+  function desenhar(tReal) {
+    const dpr = window.devicePixelRatio || 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (camadaFixa) ctx.drawImage(camadaFixa, 0, 0);
+    ctx.setTransform(escala * dpr, 0, 0, escala * dpr, 0, 0);
+    const tAnim = reduzMov ? 0 : tReal;
+
+    // previsão do trecho até o hospital
+    for (const v of estado.viat.values()) {
+      if (v.previsao && v.previsao.length > 1 && v.trecho === 1) {
+        ctx.strokeStyle = corViatura(v.id); ctx.globalAlpha = 0.45; ctx.lineWidth = 4; ctx.setLineDash([7, 7]); ctx.lineCap = 'round';
+        ctx.beginPath();
+        v.previsao.forEach((n, i) => { const p = posNo(n); i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y); });
+        ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+      }
+    }
+    // rota atual
+    for (const v of estado.viat.values()) {
+      if (!v.rota.length || (v.modo !== 'EMERGENCIA' && v.modo !== 'RETORNO')) continue;
+      const volta = v.modo === 'RETORNO';
+      const fv = veiculos.find(x => x.id === v.id);
+      const ini = fv ? fv.centro() : posNo(v.no);
+      ctx.strokeStyle = corViatura(v.id); ctx.globalAlpha = volta ? 0.4 : 0.6; ctx.lineWidth = volta ? 3 : 8; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+      if (volta) ctx.setLineDash([3, 7]);
+      ctx.beginPath(); ctx.moveTo(ini.x, ini.y);
+      for (const r of v.rota) { const p = posNo(r.no); ctx.lineTo(p.x, p.y); }
+      ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+    }
+    // anéis do corredor
+    for (const s of estado.sem.values()) {
+      if (!s.reservas.length) continue;
+      const p = posNo(s.id);
+      ctx.lineWidth = 3; ctx.strokeStyle = corViatura(s.vencedor);
+      ctx.beginPath(); ctx.arc(p.x, p.y, 25, 0, Math.PI * 2); ctx.stroke();
+      const outros = s.reservas.filter(r => r.viaturaId !== s.vencedor);
+      if (outros.length) {
+        ctx.setLineDash([4, 4]); ctx.strokeStyle = corViatura(outros[0].viaturaId);
+        ctx.beginPath(); ctx.arc(p.x, p.y, 31, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+      }
+    }
+    // faixas de parada coloridas = semáforos
+    for (const s of estado.sem.values()) {
+      const { x, y } = posNo(s.id);
+      const ns = corLuz(s.NS, tAnim), lo = corLuz(s.LO, tAnim);
+      ctx.fillStyle = ns;
+      ctx.fillRect(x - RW / 2, y - RW / 2 - 6, RW / 2, 4);
+      ctx.fillRect(x, y + RW / 2 + 2, RW / 2, 4);
+      ctx.fillStyle = lo;
+      ctx.fillRect(x - RW / 2 - 6, y, 4, RW / 2);
+      ctx.fillRect(x + RW / 2 + 2, y - RW / 2, 4, RW / 2);
+      if (s.falha) {
+        ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 4);
+        ctx.fillStyle = corLuz('PISCANTE', tAnim); ctx.fillRect(-8, -8, 16, 16); ctx.restore();
+        ctx.fillStyle = '#1d1600'; ctx.font = '800 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('!', x, y + 1);
+      }
+    }
+    // carros comuns
+    for (const c of civis) {
+      const p = c.xy();
+      ctx.save(); ctx.translate(p.x, p.y);
+      ctx.rotate(c.eixo === 'H' ? (c.sentido > 0 ? 0 : Math.PI) : (c.sentido > 0 ? Math.PI / 2 : -Math.PI / 2));
+      ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.beginPath(); ctx.roundRect(-8, -4, 17, 10, 3); ctx.fill();
+      ctx.fillStyle = c.cor; ctx.beginPath(); ctx.roundRect(-8.5, -5, 17, 10, 3); ctx.fill();
+      ctx.fillStyle = 'rgba(20,30,40,.45)'; ctx.fillRect(1.5, -3.6, 3.5, 7.2);
+      ctx.restore();
+    }
+    // viaturas
+    for (const v of veiculos) {
+      const vb = estado.viat.get(v.id);
+      const p = v.xy();
+      const emerg = vb && (vb.modo === 'EMERGENCIA' || vb.modo === 'ATENDIMENTO');
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(v.ang);
+      const len = v.tipo === 'BOMBEIROS' ? 26 : 23, lar = 12;
+      ctx.fillStyle = 'rgba(0,0,0,.25)'; ctx.beginPath(); ctx.roundRect(-len / 2 + 1, -lar / 2 + 1.5, len, lar, 3); ctx.fill();
+      ctx.fillStyle = v.tipo === 'BOMBEIROS' ? '#c8321f' : '#f4f6f7';
+      ctx.beginPath(); ctx.roundRect(-len / 2, -lar / 2, len, lar, 3); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,.35)'; ctx.lineWidth = 0.8; ctx.stroke();
+      if (v.tipo === 'AMBULANCIA') { ctx.fillStyle = '#d0263f'; ctx.fillRect(-len / 2 + 2, -1.3, len - 9, 2.6); }
+      else { ctx.fillStyle = '#f2f2f2'; ctx.fillRect(-len / 2 + 3, -lar / 2 + 2, len - 10, 1.6); ctx.fillRect(-len / 2 + 3, lar / 2 - 3.6, len - 10, 1.6); }
+      ctx.fillStyle = 'rgba(25,40,55,.75)'; ctx.fillRect(len / 2 - 6, -lar / 2 + 1.5, 3.5, lar - 3);
+      const pisca = Math.floor(tAnim * 6) % 2 === 0;
+      ctx.fillStyle = emerg ? (pisca ? '#2f7bff' : '#ff3341') : '#7f8a92';
+      ctx.fillRect(-1, -lar / 2 + 1, 3, lar / 2 - 1);
+      ctx.fillStyle = emerg ? (pisca ? '#ff3341' : '#2f7bff') : '#7f8a92';
+      ctx.fillRect(-1, 0, 3, lar / 2 - 1);
+      ctx.restore();
+      if (emerg && !reduzMov) {
+        ctx.strokeStyle = corViatura(v.id); ctx.globalAlpha = 0.35 + 0.25 * Math.sin(tReal * 6);
+        ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(p.x, p.y, 17, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+      }
+    }
+    // ocorrências abertas
+    for (const o of estado.oc) {
+      if (o.status === 'ENCERRADA') continue;
+      const p = posNo(o.no), x = p.x - 22, y = p.y + 24;
+      if (!reduzMov) {
+        const k = (tReal * 0.9) % 1;
+        ctx.strokeStyle = cores['ocorrencia']; ctx.globalAlpha = 1 - k; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(x, y, 10 + k * 12, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+      }
+      ctx.fillStyle = cores['ocorrencia']; ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ffffff'; ctx.font = '700 12px "Barlow Semi Condensed", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(String(o.criticidade), x, y + 1);
+      ctx.fillStyle = cores['map-texto']; ctx.font = '600 9.5px "JetBrains Mono", monospace'; ctx.fillText(o.id, x, y + 19);
+    }
+    // destaque do cruzamento sob o mouse
+    if (modoClique && hoverNo) {
+      const p = posNo(hoverNo);
+      ctx.strokeStyle = cores['accent']; ctx.lineWidth = 2.5; ctx.setLineDash([5, 4]);
+      ctx.beginPath(); ctx.arc(p.x, p.y, 30, 0, Math.PI * 2); ctx.stroke(); ctx.setLineDash([]);
+    }
+  }
+
+  function ajustarTamanho() {
+    const w = $('mapaWrap').clientWidth;
+    if (!w) return;
+    const dpr = window.devicePixelRatio || 1;
+    escala = w / W;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(w * H / W * dpr);
+    lerCores(); montarCamadaFixa();
+  }
+
+  // ---------- interação ----------
+  function noPerto(ev) {
+    const r = canvas.getBoundingClientRect();
+    const x = (ev.clientX - r.left) / r.width * W, y = (ev.clientY - r.top) / r.height * H;
+    let melhor = null, dist = 1e9;
+    for (const c of sis.cruzamentos.values()) {
+      const p = posNo(c.id), d = Math.hypot(p.x - x, p.y - y);
+      if (d < dist) { dist = d; melhor = c.id; }
+    }
+    return dist < 60 ? melhor : null;
+  }
+  function entrarModo(m) {
+    modoClique = m;
+    canvas.classList.toggle('clicavel', !!m);
+    $('btFalha').setAttribute('aria-pressed', m === 'falha' ? 'true' : 'false');
+    const crit = $('selCrit').value;
+    const txt = {
+      AMB: `Clique no cruzamento da ocorrência (ambulância, criticidade ${crit})`,
+      BOM: `Clique no cruzamento da ocorrência (bombeiros, criticidade ${crit})`,
+      falha: 'Clique num cruzamento para ligar ou desligar a falha'
+    }[m];
+    $('aviso').hidden = !m;
+    if (m) $('avisoTxt').textContent = txt;
+    hoverNo = null;
+  }
+  canvas.addEventListener('mousemove', ev => { if (modoClique) hoverNo = noPerto(ev); });
+  canvas.addEventListener('mouseleave', () => { hoverNo = null; });
+  canvas.addEventListener('click', ev => {
+    if (!modoClique) return;
+    const no = noPerto(ev);
+    if (!no) return;
+    if (modoClique === 'falha') {
+      const s = sis.cruzamentos.get(no).semaforo;
+      api.post(`/api/cruzamentos/${no}/falha`, { ativa: !s.falha });
+      consultar();
+      return; // continua no modo falha até cancelar
+    }
+    const tipo = modoClique === 'AMB' ? 'AMBULANCIA' : 'BOMBEIROS';
+    const r = api.post('/api/ocorrencias', { tipo, cruzamento: no, criticidade: Number($('selCrit').value) });
+    if (r.status !== 201) toast(r.corpo.erro);
+    entrarModo(null);
+    consultar();
+  });
+  $('btAmb').addEventListener('click', () => entrarModo(modoClique === 'AMB' ? null : 'AMB'));
+  $('btBom').addEventListener('click', () => entrarModo(modoClique === 'BOM' ? null : 'BOM'));
+  $('btFalha').addEventListener('click', () => entrarModo(modoClique === 'falha' ? null : 'falha'));
+  $('btCancelar').addEventListener('click', () => entrarModo(null));
+  $('btLimpar').addEventListener('click', () => {
+    for (const c of sis.cruzamentos.values()) if (c.semaforo.falha) api.post(`/api/cruzamentos/${c.id}/falha`, { ativa: false });
+    consultar();
+  });
+
+  function comando(d) {
+    const amb = veiculos.find(v => v.id === 'AMB-01');
+    if (!$('chkManual').checked) {
+      $('chkManual').checked = true;
+      toast('Você assumiu a AMB-01. Desmarque "Eu dirijo a AMB-01" para ela voltar a andar sozinha.');
+    }
+    amb.desejada = d;
+    if (d !== 'PARAR') amb.andando = true;
+  }
+  $('chkManual').addEventListener('change', e => {
+    const amb = veiculos.find(v => v.id === 'AMB-01');
+    amb.desejada = null; amb.andando = false;
+    e.target.blur();
+  });
+  document.querySelectorAll('.dpad button').forEach(b => b.addEventListener('click', () => comando(b.dataset.dir)));
+  const TECLAS = { ArrowUp: 'N', w: 'N', W: 'N', ArrowDown: 'S', s: 'S', S: 'S', ArrowRight: 'L', d: 'L', D: 'L', ArrowLeft: 'O', a: 'O', A: 'O', ' ': 'PARAR' };
+  document.addEventListener('keydown', ev => {
+    if (ev.key === 'Escape') { entrarModo(null); return; }
+    const alvo = ev.target;
+    if (alvo && (alvo.tagName === 'TEXTAREA' || (alvo.tagName === 'INPUT' && alvo.type !== 'checkbox'))) return;
+    const d = TECLAS[ev.key];
+    if (!d) return;
+    ev.preventDefault();
+    if (alvo && alvo !== document.body && alvo.blur) alvo.blur();
+    comando(d);
+  });
+  // Espaço e setas nunca "reapertam" o último botão clicado
+  document.addEventListener('keyup', ev => { if (ev.key === ' ' && ev.target && ev.target.tagName === 'BUTTON') ev.preventDefault(); });
+  document.addEventListener('click', ev => { const b = ev.target.closest('button'); if (b && ev.detail > 0) b.blur(); });
+  $('selCrit').addEventListener('change', e => e.target.blur());
+
+  $('btPausa').addEventListener('click', () => { pausado = !pausado; $('btPausa').textContent = pausado ? 'Continuar' : 'Pausar'; });
+  $('selVel').addEventListener('change', e => { velocidade = Number(e.target.value); e.target.blur(); });
+  $('btReiniciar').addEventListener('click', () => { iniciar(false); });
+
+  // ---------- abas ----------
+  function abrirAba(nome) {
+    abaAtiva = nome;
+    for (const n of ['Log', 'Req', 'Tes']) {
+      $('aba' + n).setAttribute('aria-selected', n === nome ? 'true' : 'false');
+      $('corpo' + n).hidden = n !== nome;
+    }
+    if (nome === 'Req') desenharReqs();
+    if (nome === 'Log') { ultimoLogDesenhado = -1; desenharLog(); }
+  }
+  $('abaLog').addEventListener('click', () => abrirAba('Log'));
+  $('abaReq').addEventListener('click', () => abrirAba('Req'));
+  $('abaTes').addEventListener('click', () => abrirAba('Tes'));
+  $('filtro').addEventListener('input', e => { filtroTexto = e.target.value.trim().toLowerCase(); ultimoLogDesenhado = -1; desenharLog(); });
+  $('chkApi').addEventListener('change', e => { mostrarApi = e.target.checked; ultimoLogDesenhado = -1; desenharLog(); });
+  function filtrarPor(tag) { $('filtro').value = tag; filtroTexto = tag.toLowerCase(); abrirAba('Log'); }
+
+  // ---------- painel: log ----------
+  function classeChip(t) { return t === 'API' ? 'api' : t.startsWith('RNF') ? 'rnf' : t.startsWith('RN') ? 'rn' : t.startsWith('UC') ? 'uc' : ''; }
+  function chips(tags) {
+    return tags.map(t => `<button type="button" class="chip ${classeChip(t)}" data-tag="${t}">${t}</button>`).join('');
+  }
+  function desenharLog() {
+    const ultimo = sis.log.length ? sis.log[sis.log.length - 1].seq : 0;
+    $('nLog').textContent = sis.log.filter(e => e.tipo !== 'api').length;
+    if (abaAtiva !== 'Log' || ultimo === ultimoLogDesenhado) return;
+    ultimoLogDesenhado = ultimo;
+    const itens = [];
+    for (let i = sis.log.length - 1; i >= 0 && itens.length < 250; i--) {
+      const e = sis.log[i];
+      const ehApi = e.tipo === 'api';
+      if (ehApi && !mostrarApi) continue;
+      if (filtroTexto) {
+        const alvo = (e.tags.join(' ') + ' ' + e.mensagem).toLowerCase();
+        if (!alvo.includes(filtroTexto)) continue;
+      }
+      const msg = e.mensagem.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+      itens.push(`<li class="${e.tipo === 'info' ? 'sis' : e.tipo}"><time>${fmtT(e.t)}</time><div class="tags">${chips(e.tags)}</div><div class="msg">${msg}</div></li>`);
+    }
+    $('listaLog').innerHTML = itens.length ? itens.join('') : `<li class="vazio" style="display:block">Nenhum evento${filtroTexto ? ' com "' + filtroTexto + '"' : ''} ainda.</li>`;
+  }
+  $('listaLog').addEventListener('click', e => { const b = e.target.closest('[data-tag]'); if (b) filtrarPor(b.dataset.tag); });
+
+  // ---------- requisitos agindo, em cima do mapa ----------
+  let feedChave = '';
+  function desenharFeed() {
+    const itens = [];
+    for (let i = sis.log.length - 1; i >= 0 && itens.length < 3; i--) {
+      const e = sis.log[i];
+      if (sis.t - e.t > 12) break;
+      if (e.tipo === 'api' || e.tipo === 'info' || !e.tags.some(t => /^(RN|UC)/.test(t))) continue;
+      itens.push(e);
+    }
+    const chave = itens.map(e => e.seq).join(',');
+    if (chave === feedChave && $('feed').childElementCount) return;
+    const antigos = new Set(feedChave.split(','));
+    feedChave = chave;
+    if (!itens.length) { $('feed').innerHTML = '<li class="vazio-feed">As regras aparecem aqui na hora em que agem. Dirija ou registre uma emergência.</li>'; return; }
+    $('feed').innerHTML = itens.map(e => {
+      const msg = e.mensagem.length > 120 ? e.mensagem.slice(0, 118) + '…' : e.mensagem;
+      const cls = [e.tipo === 'alerta' ? 'alerta' : '', antigos.has(String(e.seq)) ? '' : 'novo'].join(' ');
+      return `<li class="${cls}"><span class="tags">${e.tags.filter(t => t !== 'API').map(t => `<span class="chip ${classeChip(t)}">${t}</span>`).join('')}</span><span>${msg.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]))}</span></li>`;
+    }).join('');
+  }
+  $('btIrReq').addEventListener('click', () => { abrirAba('Req'); $('painel').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+
+  // ---------- painel: requisitos ----------
+  function resultadoTeste(id) {
+    if (!testesRes) return null;
+    const rel = testesRes.filter(t => t.reqs.includes(id));
+    if (!rel.length) return null;
+    return { ok: rel.every(t => t.ok), n: rel.length };
+  }
+  function desenharReqs() {
+    if (abaAtiva !== 'Req') return;
+    const linha = (id, txt, extra) => {
+      const n = sis.contagem[id] || 0;
+      const tr = resultadoTeste(id);
+      const st = tr ? `<span class="tst ${tr.ok ? 'ok' : 'falha'}">${tr.ok ? '✓' : '✗'} teste</span>` : extra ? `<span class="tst man">${extra}</span>` : '';
+      return `<button type="button" class="req" data-id="${id}"><span class="rid">${id}</span><span class="rtxt">${txt}</span><span class="rst"><span class="obs ${n ? 'sim' : ''}">${n ? n + '× na maquete' : 'ainda não agiu'}</span>${st}</span></button>`;
+    };
+    let h = '<div class="req-grupo">Regras de negócio</div>';
+    h += R.rn.map(r => linha(r.id, r.texto)).join('');
+    h += '<div class="req-grupo">Casos de uso</div>';
+    h += R.uc.map(u => linha(u.id, `<b>${u.nome}.</b> ${u.resumo}.`)).join('');
+    h += '<div class="req-grupo">Requisitos não funcionais</div>';
+    h += R.rnf.map(r => linha(r.id, `<b>${r.atributo}.</b> ${r.texto}.`, r.auto ? null : (r.id === 'RNF11' ? 'medido no C#' : 'roteiro manual'))).join('');
+    const el = $('listaReq'), topo = el.scrollTop;
+    el.innerHTML = h; el.scrollTop = topo;
+  }
+  $('listaReq').addEventListener('click', e => { const b = e.target.closest('.req'); if (b) filtrarPor(b.dataset.id); });
+
+  // ---------- painel: testes ----------
+  function rodarTestes() {
+    $('placar').textContent = 'Rodando…'; $('placar').className = 'placar';
+    setTimeout(() => {
+      testesRes = L.rodarTestes();
+      const ok = testesRes.filter(t => t.ok).length;
+      const ms = testesRes.reduce((a, t) => a + t.ms, 0);
+      $('placar').textContent = `${ok} de ${testesRes.length} passaram · ${ms.toFixed(0)} ms`;
+      $('placar').className = 'placar ' + (ok === testesRes.length ? 'ok' : 'falha');
+      $('nTes').textContent = `${ok}/${testesRes.length}`;
+      $('listaTes').innerHTML = testesRes.map(t => `
+        <div class="teste ${t.ok ? '' : 'falhou'}">
+          <span class="ic">${t.ok ? '✓' : '✗'}</span>
+          <span class="tnome">${t.nome} <span>${t.ms.toFixed(0)} ms</span></span>
+          <span class="tdet">${t.detalhe}</span>
+          <span class="tags">${chips(t.reqs)}</span>
+        </div>`).join('');
+      desenharReqs();
+    }, 30);
+  }
+  $('btTestes').addEventListener('click', rodarTestes);
+  $('listaTes').addEventListener('click', e => { const b = e.target.closest('[data-tag]'); if (b) filtrarPor(b.dataset.tag); });
+
+  // ---------- status ----------
+  function textoStatus(v) {
+    if (v.modo === 'RESERVA') return ['res', 'Reserva na base'];
+    if (v.modo === 'RETORNO') return ['res', 'Voltando à base'];
+    if (v.modo === 'ATENDIMENTO') return ['atend', `Atendimento · ${Math.ceil(v.atendimentoRestante)} s`];
+    if (v.modo === 'EMERGENCIA') {
+      if (v.semRota) return ['emerg', 'Sem rota · aguardando'];
+      return ['emerg', v.trecho === 2 ? `Indo ao ${v.hospital}` : 'Indo ao local'];
+    }
+    return ['ok', 'Patrulhando'];
+  }
+  let ultimaFrota = '';
+  function atualizarStatus() {
+    $('relogio').textContent = fmtT(sis.t);
+    const linhas = veiculos.map(fv => {
+      const v = estado.viat.get(fv.id);
+      if (!v) return '';
+      const [c, txt] = textoStatus(v);
+      let info = '';
+      if ((v.modo === 'EMERGENCIA' || v.modo === 'RETORNO') && v.rota.length) info = (v.ocorrenciaId ? v.ocorrenciaId + ' · ' : '') + v.rota.map(r => r.no).join(' → ');
+      else if (v.modo === 'PATRULHA') info = (fv.id === 'AMB-01' && $('chkManual').checked ? 'Você dirige · ' : '') + (fv.para ? `${fv.no} → ${fv.para}` : `em ${fv.no}`) + (fv.esperando ? ' · esperando o verde' : '');
+      return `<li><span class="vid">${fv.id}</span><span class="pill ${c}">${txt}</span><span class="info">${info}</span></li>`;
+    }).join('');
+    if (linhas !== ultimaFrota) { $('frota').innerHTML = linhas; ultimaFrota = linhas; }
+  }
+
+  // ---------- laço principal ----------
+  let ultimo = performance.now(), acumConsulta = 0, acumUi = 0, acumReq = 0, demo = null;
+  function passo(dt) {
+    sis.tick(dt);
+    if (demo && sis.t >= demo.em) { demo.fn(); demo = null; }
+    acumConsulta += dt;
+    if (acumConsulta >= 0.25) { consultar(); acumConsulta = 0; }
+    for (const v of veiculos) v.atualizar(dt);
+    for (const c of civis) c.atualizar(dt);
+  }
+  function quadro(agora) {
+    const dt = Math.min(0.05, (agora - ultimo) / 1000);
+    ultimo = agora;
+    if (!pausado) {
+      let resto = dt * velocidade;
+      while (resto > 1e-6) { const p = Math.min(0.05, resto); passo(p); resto -= p; }
+    }
+    desenhar(agora / 1000);
+    acumUi += dt; acumReq += dt;
+    if (acumUi > 0.2) { atualizarStatus(); desenharLog(); desenharFeed(); acumUi = 0; }
+    if (acumReq > 1) { desenharReqs(); acumReq = 0; }
+    requestAnimationFrame(quadro);
+  }
+
+  function iniciar(primeiraVez) {
+    sis = new L.Sistema();
+    api = L.criarApi(sis);
+    estado = { sem: new Map(), viat: new Map(), oc: [] };
+    veiculos = R.malha.viaturas.map(v => new VeiculoFront(v.id, v.tipo, v.base, v.tipo === 'AMBULANCIA' ? 'L' : 'O'));
+    $('chkManual').checked = false; ultimaFrota = '';
+    civis = criarCivis();
+    entrarModo(null);
+    ultimoLogDesenhado = -1; feedChave = '';
+    sis.registrar([], 'Maquete pronta: AMB-01 e BOM-01 patrulhando; AMB-02 e BOM-02 de reserva na Base do SAMU (C11) e no quartel (C20).', 'info');
+    if (primeiraVez) {
+      demo = {
+        em: 1.5, fn: () => {
+          sis.registrar([], 'Exemplo automático: uma ocorrência foi registrada para mostrar o corredor. Depois dela, a maquete é sua.', 'info');
+          api.post('/api/ocorrencias', { tipo: 'AMBULANCIA', cruzamento: 'C9', criticidade: 2 });
+        }
+      };
+    } else demo = null;
+    consultar();
+    ajustarTamanho();
+    atualizarStatus(); desenharLog(); desenharReqs();
+  }
+
+  new ResizeObserver(() => ajustarTamanho()).observe($('mapaWrap'));
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  const reler = () => { lerCores(); montarCamadaFixa(); };
+  if (mq.addEventListener) mq.addEventListener('change', reler);
+  new MutationObserver(reler).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(reler);
+
+  iniciar(true);
+  rodarTestes();
+  requestAnimationFrame(quadro);
+})();
+</script>
