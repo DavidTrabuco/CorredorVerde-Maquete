@@ -86,31 +86,34 @@
   --font-mono: var(--f-mono);
 }
 
-html,
-body {
-  height: 100%;
-}
+/* Em @layer base para as classes do Tailwind (utilities) poderem sobrescrever. */
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
 
-body {
-  background: var(--bg);
-  color: var(--fg);
-  font-family: var(--f-body);
-  font-size: 15px;
-  line-height: 1.45;
-}
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--f-body);
+    font-size: 15px;
+    line-height: 1.45;
+  }
 
-button,
-select,
-input {
-  font: inherit;
-  color: inherit;
-}
+  button,
+  select,
+  input {
+    font: inherit;
+    color: inherit;
+  }
 
-button {
-  cursor: pointer;
-}
+  button {
+    cursor: pointer;
+  }
 
-:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
 }

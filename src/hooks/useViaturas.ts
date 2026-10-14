@@ -282,6 +282,10 @@ function criarMotor() {
       if (d !== 'PARAR') amb.andando = true
     },
 
+    esperando(id: string): boolean {
+      return veiculos.get(id)?.esperando ?? false
+    },
+
     centro(id: string): Ponto | null {
       const v = veiculos.get(id)
       return v && store().malha ? centro(v) : null
